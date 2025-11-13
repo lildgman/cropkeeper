@@ -1,28 +1,30 @@
-package com.cropkeeper.domain.harvest.entity;
-
+package com.cropkeeper.domain.inventory.entity;
 
 import com.cropkeeper.domain.crop.entity.CropVariety;
-import com.cropkeeper.domain.farminglog.entity.FarmingLog;
+import com.cropkeeper.domain.farm.entity.Farm;
 import com.cropkeeper.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "harvest")
+@Table(name = "crop_inventory",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"farm_id", "variety_id"})
+    })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Harvest extends BaseTimeEntity {
+public class CropInventory extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "harvest_id")
-    private Long harvestId;
+    @Column(name = "crop_inventory_id")
+    private Long cropInventoryId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "log_id", nullable = false)
-    private FarmingLog farmingLog;
+    @JoinColumn(name = "farm_id", nullable = false)
+    private Farm farm;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "variety_id", nullable = false)
@@ -30,4 +32,5 @@ public class Harvest extends BaseTimeEntity {
 
     @Column(name = "quantity_box", nullable = false)
     private Long quantityBox;
+
 }

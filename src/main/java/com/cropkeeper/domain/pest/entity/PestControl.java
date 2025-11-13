@@ -28,4 +28,7 @@ public class PestControl extends BaseTimeEntity {
 
     @Column(name = "used_amount_bottle", nullable = false)
     private Long usedAmountBottle;
+
+    @Column(name = "used_water_liter", nullable = false)
+    private Long usedWaterLiter;
 }

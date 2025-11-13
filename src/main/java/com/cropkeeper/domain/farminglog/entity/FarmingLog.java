@@ -37,10 +37,10 @@ public class FarmingLog extends BaseTimeEntity {
     private String weather;
 
     @Column(name = "temperature")
-    private Integer temperature;
+    private Long temperature;
 
     @Column(name = "humidity")
-    private Integer humidity;
+    private Long humidity;
 
     @Column(name = "memo", length = 255)
     private String memo;

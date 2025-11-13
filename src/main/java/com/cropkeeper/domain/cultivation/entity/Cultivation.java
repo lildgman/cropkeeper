@@ -28,5 +28,5 @@ public class Cultivation extends BaseTimeEntity {
     private CropVariety variety;
 
     @Column(name = "planting_amount")
-    private Integer plantingAmount;
+    private Long plantingAmount;
 }
