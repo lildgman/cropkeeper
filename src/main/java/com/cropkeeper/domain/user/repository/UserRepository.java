@@ -1,6 +1,6 @@
 package com.cropkeeper.domain.user.repository;
 
-import com.cropkeeper.domain.user.entity.User;
+import com.cropkeeper.domain.user.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,7 +13,7 @@ import java.util.Optional;
  * - save(), findById(), findAll(), delete() 등
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<Users, Long> {
 
     /**
      * 사용자 이름(username)으로 사용자 조회
@@ -22,7 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param username 사용자 이름
      * @return Optional로 감싸진 User 객체 (없으면 Optional.empty())
      */
-    Optional<User> findByUsername(String username);
+    Optional<Users> findByUsername(String username);
 
     /**
      * 사용자 이름이 이미 존재하는지 확인

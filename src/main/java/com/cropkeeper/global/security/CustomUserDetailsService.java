@@ -1,6 +1,6 @@
 package com.cropkeeper.global.security;
 
-import com.cropkeeper.domain.user.entity.User;
+import com.cropkeeper.domain.user.entity.Users;
 import com.cropkeeper.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,13 +40,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 1. DB에서 사용자 조회
-        User user = userRepository.findByUsername(username)
+        Users users = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "사용자를 찾을 수 없습니다: " + username
                 ));
 
         // 2. User 엔티티를 UserPrincipal로 변환하여 반환
-        return new UserPrincipal(user);
+        return new UserPrincipal(users);
     }
 
     /**
@@ -60,11 +60,11 @@ public class CustomUserDetailsService implements UserDetailsService {
      */
     @Transactional(readOnly = true)
     public UserPrincipal loadUserById(Long userId) {
-        User user = userRepository.findById(userId)
+        Users users = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "사용자를 찾을 수 없습니다. ID: " + userId
                 ));
 
-        return new UserPrincipal(user);
+        return new UserPrincipal(users);
     }
 }

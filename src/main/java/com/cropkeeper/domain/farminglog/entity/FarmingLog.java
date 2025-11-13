@@ -1,7 +1,7 @@
 package com.cropkeeper.domain.farminglog.entity;
 
 import com.cropkeeper.domain.farm.entity.Farm;
-import com.cropkeeper.domain.user.entity.User;
+import com.cropkeeper.domain.user.entity.Users;
 import com.cropkeeper.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,7 +28,7 @@ public class FarmingLog extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Users users;
 
     @Column(name = "log_date", nullable = false)
     private LocalDateTime logDate;
