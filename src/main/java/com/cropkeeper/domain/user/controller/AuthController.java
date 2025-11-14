@@ -1,8 +1,9 @@
 package com.cropkeeper.domain.user.controller;
 
-import com.cropkeeper.domain.user.dto.AuthResponse;
 import com.cropkeeper.domain.user.dto.LoginRequest;
+import com.cropkeeper.domain.user.dto.LoginResponse;
 import com.cropkeeper.domain.user.dto.RegisterRequest;
+import com.cropkeeper.domain.user.dto.RegisterResponse;
 import com.cropkeeper.domain.user.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +33,10 @@ public class AuthController {
      * @return 201 Created + JWT 토큰 및 사용자 정보
      */
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         log.info("회원가입 API 호출: username={}", request.getUsername());
 
-        AuthResponse response = authService.register(request);
+        RegisterResponse response = authService.register(request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)  // 201 Created
@@ -49,10 +50,10 @@ public class AuthController {
      * @return 200 OK + JWT 토큰 및 사용자 정보
      */
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         log.info("로그인 API 호출: username={}", request.getUsername());
 
-        AuthResponse response = authService.login(request);
+        LoginResponse response = authService.login(request);
 
         return ResponseEntity.ok(response);  // 200 OK
     }

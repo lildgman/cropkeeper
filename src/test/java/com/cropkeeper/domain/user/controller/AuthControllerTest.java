@@ -64,8 +64,6 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())  // 요청/응답 출력
                 .andExpect(status().isCreated())  // 201 Created
-                .andExpect(jsonPath("$.accessToken").exists())  // 토큰 존재
-                .andExpect(jsonPath("$.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.username").value("testuser01"))
                 .andExpect(jsonPath("$.name").value("홍길동"))
                 .andExpect(jsonPath("$.role").value("USER"));

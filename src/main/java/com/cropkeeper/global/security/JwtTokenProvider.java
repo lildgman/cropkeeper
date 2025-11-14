@@ -24,63 +24,64 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final SecretKey secretKey;
-    private final long expirationTime;
+    private final long accessTokenExpirationTime;;
+    private final long refreshTokenExpirationTime;
 
-    /**
-     * 생성자: application.yml에서 설정값을 주입받음
-     *
-     * @param secretKey Base64로 인코딩된 비밀키 (256비트 이상)
-     * @param expirationTime 토큰 만료 시간 (밀리초, 기본 1시간)
-     */
     public JwtTokenProvider(
             @Value("${jwt.secret-key}") String secretKey,
-            @Value("${jwt.expiration-time}") long expirationTime) {
+            @Value("${jwt.access-token-expiration-time:900000}") long accessTokenExpirationTime,
+            @Value("${jwt.refresh-token-expiration-time:604800000}") long refreshTokenExpirationTime) {
         // Base64로 인코딩된 비밀키를 디코딩하여 SecretKey 객체 생성
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
-        this.expirationTime = expirationTime;
+        this.accessTokenExpirationTime = accessTokenExpirationTime;
+        this.refreshTokenExpirationTime = refreshTokenExpirationTime;
+    }
+
+    public String generateAccessToken(String username) {
+        return generateToken(username, accessTokenExpirationTime, "access");
+    }
+
+    public String generateRefreshToken(String username) {
+        return generateToken(username, refreshTokenExpirationTime, "refresh");
     }
 
     /**
      * JWT 토큰 생성
-     *
-     * @param username 사용자 이름 (토큰의 subject로 저장됨)
-     * @return 생성된 JWT 토큰 문자열
      */
-    public String generateToken(String username) {
+    public String generateToken(String username, long expirationTime, String tokenType) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationTime);
 
         return Jwts.builder()
-                .subject(username)              // 토큰 주체 (사용자 이름)
-                .issuedAt(now)                  // 발급 시간
-                .expiration(expiryDate)         // 만료 시간
-                .signWith(secretKey)            // 비밀키로 서명
-                .compact();                     // 최종 토큰 문자열 생성
+                .subject(username)
+                .claim("type", tokenType)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(secretKey)
+                .compact();
     }
 
-    /**
-     * JWT 토큰에서 사용자 이름 추출
-     *
-     * @param token JWT 토큰
-     * @return 토큰에 저장된 사용자 이름
-     */
+    public String getTokenType(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.get("type", String.class);
+    }
+
     public String getUsername(String token) {
         Claims claims = Jwts.parser()
-                .verifyWith(secretKey)          // 비밀키로 검증
+                .verifyWith(secretKey)
                 .build()
-                .parseSignedClaims(token)       // 토큰 파싱
-                .getPayload();                  // 페이로드 추출
+                .parseSignedClaims(token)
+                .getPayload();
 
-        return claims.getSubject();             // subject (사용자 이름) 반환
+        return claims.getSubject();
     }
 
-    /**
-     * JWT 토큰 유효성 검증
-     *
-     * @param token JWT 토큰
-     * @return 유효하면 true, 아니면 false
-     */
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
@@ -100,12 +101,6 @@ public class JwtTokenProvider {
         return false;
     }
 
-    /**
-     * JWT 토큰의 만료 시간 확인
-     *
-     * @param token JWT 토큰
-     * @return 만료 시간 (Date 객체)
-     */
     public Date getExpirationDate(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(secretKey)

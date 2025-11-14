@@ -1,7 +1,9 @@
 package com.cropkeeper.domain.user.service;
 
 import com.cropkeeper.domain.user.dto.LoginRequest;
+import com.cropkeeper.domain.user.dto.LoginResponse;
 import com.cropkeeper.domain.user.dto.RegisterRequest;
+import com.cropkeeper.domain.user.dto.RegisterResponse;
 import com.cropkeeper.domain.user.entity.UserRole;
 import com.cropkeeper.domain.user.entity.Users;
 import com.cropkeeper.domain.user.repository.UserRepository;
@@ -24,15 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-/**
- * AuthService 단위 테스트
- *
- * 특징:
- * - @ExtendWith(MockitoExtension.class): Mockito 사용 (Spring 없이 빠름)
- * - @Mock: 의존성을 가짜 객체로 대체
- * - @InjectMocks: Mock들을 주입받아 테스트 대상 생성
- * - 비즈니스 로직만 집중 테스트
- */
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
@@ -63,10 +56,8 @@ class AuthServiceTest {
                 .contact("01012345678")
                 .build();
 
-        // Mock 동작 정의
         when(userRepository.existsByUsername("testuser01")).thenReturn(false);
         when(passwordEncoder.encode("pass1234")).thenReturn("$2a$10$encoded");
-        when(jwtTokenProvider.generateToken("testuser01")).thenReturn("jwt-token");
 
         Users savedUser = Users.builder()
                 .userId(1L)
@@ -75,13 +66,13 @@ class AuthServiceTest {
                 .name("홍길동")
                 .role(UserRole.USER)
                 .build();
+
         when(userRepository.save(any(Users.class))).thenReturn(savedUser);
 
         // when
-        var response = authService.register(request);
+        RegisterResponse response = authService.register(request);
 
         // then
-        assertThat(response.getAccessToken()).isEqualTo("jwt-token");
         assertThat(response.getUsername()).isEqualTo("testuser01");
         assertThat(response.getRole()).isEqualTo("USER");
 
@@ -98,7 +89,7 @@ class AuthServiceTest {
         RegisterRequest request = RegisterRequest.builder()
                 .username("testuser01")
                 .password("pass1234")
-                .passwordConfirm("pass5678")  // 다름!
+                .passwordConfirm("pass5678")
                 .name("홍길동")
                 .build();
 
@@ -156,18 +147,22 @@ class AuthServiceTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(null);  // 인증 성공 (반환값은 사용 안함)
         when(userRepository.findByUsername("testuser01")).thenReturn(Optional.of(user));
-        when(jwtTokenProvider.generateToken("testuser01")).thenReturn("jwt-token");
+
+        when(jwtTokenProvider.generateAccessToken("testuser01")).thenReturn("access-token-123");
+        when(jwtTokenProvider.generateRefreshToken("testuser01")).thenReturn("refresh-token-123");
 
         // when
-        var response = authService.login(request);
+        LoginResponse response = authService.login(request);
 
         // then
-        assertThat(response.getAccessToken()).isEqualTo("jwt-token");
+        assertThat(response.getAccessToken()).isEqualTo("access-token-123");
+        assertThat(response.getRefreshToken()).isEqualTo("refresh-token-123");
         assertThat(response.getUsername()).isEqualTo("testuser01");
 
         // 검증
         verify(authenticationManager, times(1)).authenticate(any());
-        verify(jwtTokenProvider, times(1)).generateToken("testuser01");
+        verify(jwtTokenProvider, times(1)).generateAccessToken("testuser01");
+        verify(jwtTokenProvider, times(1)).generateRefreshToken("testuser01");
     }
 
     @Test
@@ -188,7 +183,8 @@ class AuthServiceTest {
                 .isInstanceOf(BadCredentialsException.class);
 
         // 검증: 인증 실패 시 토큰이 생성되지 않아야 함
-        verify(jwtTokenProvider, never()).generateToken(anyString());
+        verify(jwtTokenProvider, never()).generateAccessToken(anyString());
+        verify(jwtTokenProvider, never()).generateRefreshToken(anyString());
     }
 
     @Test
@@ -204,7 +200,6 @@ class AuthServiceTest {
 
         when(userRepository.existsByUsername(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("encoded");
-        when(jwtTokenProvider.generateToken(anyString())).thenReturn("token");
 
         Users savedUser = Users.builder()
                 .userId(1L)
@@ -214,7 +209,7 @@ class AuthServiceTest {
         when(userRepository.save(any(Users.class))).thenReturn(savedUser);
 
         // when
-        var response = authService.register(request);
+        RegisterResponse response = authService.register(request);
 
         // then
         assertThat(response.getRole()).isEqualTo("USER");

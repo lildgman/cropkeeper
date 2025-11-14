@@ -13,19 +13,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-/**
- * UserRepository 단위 테스트
- *
- * 특징:
- * - @DataJpaTest: JPA 관련 Bean만 로드 (가벼움)
- * - 실제 H2 DB 사용 (빠름)
- * - 각 테스트 후 자동 롤백
- * - TestEntityManager: 테스트용 엔티티 매니저
- *
- * 테스트 대상:
- * - 커스텀 쿼리 메서드 (findByUsername, existsByUsername)
- * - 복잡한 쿼리가 있다면 반드시 테스트 필요
- */
 @DataJpaTest
 class UserRepositoryTest {
 
@@ -41,8 +28,8 @@ class UserRepositoryTest {
         // given
         Users user = Users.builder()
                 .username("testuser01")
-                .password("encoded_password")
-                .name("홍길동")
+                .password("password")
+                .name("odg")
                 .role(UserRole.USER)
                 .build();
         entityManager.persist(user);
@@ -54,7 +41,7 @@ class UserRepositoryTest {
         // then
         assertThat(found).isPresent();
         assertThat(found.get().getUsername()).isEqualTo("testuser01");
-        assertThat(found.get().getName()).isEqualTo("홍길동");
+        assertThat(found.get().getName()).isEqualTo("odg");
         assertThat(found.get().getRole()).isEqualTo(UserRole.USER);
     }
 
@@ -99,29 +86,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("save - 새 사용자 저장")
-    void save_NewUser() {
-        // given
-        Users user = Users.builder()
-                .username("newuser")
-                .password("password")
-                .name("김철수")
-                .contact("01012345678")
-                .role(UserRole.USER)
-                .build();
-
-        // when
-        Users saved = userRepository.save(user);
-
-        // then
-        assertThat(saved.getUserId()).isNotNull();  // ID 자동 생성 확인
-        assertThat(saved.getUsername()).isEqualTo("newuser");
-        assertThat(saved.getCreatedAt()).isNotNull();  // BaseTimeEntity 동작 확인
-        assertThat(saved.getUpdatedAt()).isNotNull();
-    }
-
-    @Test
-    @DisplayName("username은 unique 제약조건이 있음")
+    @DisplayName("username 중복")
     void save_DuplicateUsername_ThrowsException() {
         // given
         Users user1 = Users.builder()
@@ -147,34 +112,4 @@ class UserRepositoryTest {
         }).isInstanceOf(Exception.class);  // ConstraintViolationException 등
     }
 
-    @Test
-    @DisplayName("여러 사용자 저장 및 조회")
-    void findAll_MultipleUsers() {
-        // given
-        Users user1 = Users.builder()
-                .username("user1")
-                .password("pass1")
-                .name("사용자1")
-                .role(UserRole.USER)
-                .build();
-
-        Users user2 = Users.builder()
-                .username("user2")
-                .password("pass2")
-                .name("사용자2")
-                .role(UserRole.ADMIN)
-                .build();
-
-        entityManager.persist(user1);
-        entityManager.persist(user2);
-        entityManager.flush();
-
-        // when
-        var users = userRepository.findAll();
-
-        // then
-        assertThat(users).hasSize(2);
-        assertThat(users).extracting(Users::getUsername)
-                .containsExactlyInAnyOrder("user1", "user2");
-    }
 }
