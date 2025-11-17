@@ -1,6 +1,7 @@
 package com.cropkeeper.domain.user.service;
 
 import com.cropkeeper.domain.user.dto.UpdateMemberInfoRequest;
+import com.cropkeeper.domain.user.dto.UpdatePasswordRequest;
 import com.cropkeeper.domain.user.entity.Member;
 import com.cropkeeper.domain.user.entity.MemberRole;
 import com.cropkeeper.domain.user.repository.MemberRepository;
@@ -188,8 +189,6 @@ class MemberServiceTest {
                 .hasMessage("해당 회원을 찾을 수 없습니다.");
 
         verify(memberRepository, times(1)).findById(memberId);
-
-
     }
 
     @Test
@@ -209,5 +208,212 @@ class MemberServiceTest {
                 .hasMessage("수정할 정보가 없습니다. 이름 또는 연락처를 입력해주세요.");
 
         verify(memberRepository, never()).findById(any());
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 성공")
+    void changePassword_Success() {
+
+        // given
+        Long memberId = 1L;
+        String currentPassword = "oldpass1234";
+        String encodedCurrentPassword = "encodedOldPassword";
+        String newPassword = "newPass1234";
+
+        Member member = Member.builder()
+                .memberId(memberId)
+                .username("testuser01")
+                .password(encodedCurrentPassword)
+                .name("test")
+                .role(MemberRole.USER)
+                .build();
+
+        UpdatePasswordRequest request = UpdatePasswordRequest.builder()
+                .currentPassword(currentPassword)
+                .newPassword(newPassword)
+                .newPasswordConfirm(newPassword)
+                .build();
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(passwordEncoder.matches(currentPassword, encodedCurrentPassword)).thenReturn(true);
+        when(passwordEncoder.matches(newPassword, encodedCurrentPassword)).thenReturn(false);
+        when(passwordEncoder.encode(newPassword)).thenReturn("encodedNewPassword");
+
+        // when
+        memberService.changePassword(memberId, request);
+
+        // then
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(passwordEncoder, times(1)).matches(currentPassword, encodedCurrentPassword);
+        verify(passwordEncoder, times(1)).encode(newPassword);
+
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 실패 - 현재 비밀번호 불일치")
+    void changePassword_Fail_WrongCurrentPassword() {
+
+        // given
+        Long memberId = 1L;
+        Member member = Member.builder()
+                .memberId(memberId)
+                .username("testuser01")
+                .password("encodedPassword")
+                .name("test")
+                .role(MemberRole.USER)
+                .build();
+
+        UpdatePasswordRequest request = UpdatePasswordRequest.builder()
+                .currentPassword("wrongPassword")
+                .newPassword("newPassword1234")
+                .newPasswordConfirm("newPassword1234")
+                .build();
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
+
+        // when, then
+        assertThatThrownBy(() -> memberService.changePassword(memberId, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("현재 비밀번호가 일치하지 않습니다.");
+
+        verify(passwordEncoder, never()).encode(anyString());
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 실패 - 새 비밀번호 불일치")
+    void changePassword_Fail_NewPasswordMismatch() {
+
+        // given
+        Long memberId = 1L;
+        Member member = Member.builder()
+                .memberId(memberId)
+                .username("testuser01")
+                .password("encodedPassword")
+                .name("test")
+                .role(MemberRole.USER)
+                .build();
+
+        UpdatePasswordRequest request = UpdatePasswordRequest.builder()
+                .currentPassword("oldPass1234")
+                .newPassword("newPass1234")
+                .newPasswordConfirm("diffNewPass1234")
+                .build();
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(passwordEncoder.matches("oldPass1234", "encodedPassword")).thenReturn(true);
+
+        // when, then
+        assertThatThrownBy(() -> memberService.changePassword(memberId, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("새 비밀번호가 일치하지 않습니다.");
+
+        verify(passwordEncoder, never()).encode(anyString());
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 실패 - 새 비밀번호가 현재 비밀번호와 일치")
+    void changePassword_Fail_SameCurrentPassword() {
+
+        // given
+        Long memberId = 1L;
+        String currentPassword = "pass1234";
+        String encodedPassword = "encodedPassword";
+
+        Member member = Member.builder()
+                .memberId(memberId)
+                .username("testuser01")
+                .password(encodedPassword)
+                .name("홍길동")
+                .role(MemberRole.USER)
+                .build();
+
+        UpdatePasswordRequest request = UpdatePasswordRequest.builder()
+                .currentPassword(currentPassword)
+                .newPassword(currentPassword)
+                .newPasswordConfirm(currentPassword)
+                .build();
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(passwordEncoder.matches(currentPassword, encodedPassword)).thenReturn(true);
+
+        assertThatThrownBy(() -> memberService.changePassword(memberId, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("새 비밀번호는 현재 비밀번호와 달라야합니다.");
+
+        verify(passwordEncoder, never()).encode(anyString());
+
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 성공")
+    void deleteMember_Success() {
+
+        // given
+        Long memberId = 1L;
+        Member member = Member.builder()
+                .memberId(memberId)
+                .username("testuser01")
+                .password("encodedPassword")
+                .name("test01")
+                .role(MemberRole.USER)
+                .deleted(false)
+                .build();
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+
+        // when
+        memberService.deleteMember(memberId);
+
+        // then
+        assertThat(member.isDeleted()).isTrue();
+        assertThat(member.getDeletedAt()).isNotNull();
+
+        verify(memberRepository, times(1)).findById(memberId);
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 실패 - 존재하지 않는 회원")
+    void deleteMember_Fail_MemberNotFound() {
+
+        // given
+        Long memberId = 999L;
+        when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> memberService.deleteMember(memberId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("해당 회원을 찾을 수 없습니다.");
+
+        verify(memberRepository, times(1)).findById(memberId);
+
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 실패 - 이미 탈퇴한 회원")
+    void deleteMember_Fail_AlreadyDeleted() {
+
+        // given
+        Long memberId = 1L;
+        Member member = Member.builder()
+                .memberId(memberId)
+                .username("testuser01")
+                .password("encodedPassword")
+                .name("test01")
+                .role(MemberRole.USER)
+                .deleted(false)
+                .build();
+
+        member.delete();
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+
+        // when, then
+        assertThatThrownBy(() -> memberService.deleteMember(memberId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 탈퇴한 회원입니다.");
+
+        verify(memberRepository, times(1)).findById(memberId);
+
     }
 }

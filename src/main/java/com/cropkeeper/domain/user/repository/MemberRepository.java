@@ -12,7 +12,6 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-
     /**
      * username으로 회원 조회(탈퇴하지 않은 회원만)
      *

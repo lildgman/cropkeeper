@@ -19,16 +19,16 @@ import lombok.NoArgsConstructor;
 public class RegisterRequest {
 
     @NotBlank(message = "사용자 이름은 필수입니다.")
-    @Size(min = 8, max = 16, message = "사용자 이름은 8자 이상 16자 이하여야 합니다.")
+    @Size(min = 4, max = 16, message = "사용자 이름은 4자 이상 16자 이하여야 합니다.")
     @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "사용자 이름은 영문과 숫자만 사용 가능합니다.")
     private String username;
 
     @NotBlank(message = "비밀번호는 필수입니다.")
-    @Size(min = 4, max = 16, message = "비밀번호는 8자 이상 16자 이하여야 합니다.")
+    @Size(min = 4, max = 16, message = "비밀번호는 4자 이상 16자 이하여야 합니다.")
     private String password;
 
     @NotBlank(message = "비밀번호 확인은 필수입니다.")
-    @Size(min = 4, max = 16, message = "비밀번호는 8자 이상 16자 이하여야 합니다.")
+    @Size(min = 4, max = 16, message = "비밀번호는 4자 이상 16자 이하여야 합니다.")
     private String passwordConfirm;
 
     @NotBlank(message = "이름은 필수입니다.")
