@@ -3,7 +3,7 @@ package com.cropkeeper.domain.user.entity;
 import lombok.Getter;
 
 @Getter
-public enum UserRole {
+public enum MemberRole {
 
     ADMIN,
     MANAGER,

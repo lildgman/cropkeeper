@@ -1,6 +1,6 @@
 package com.cropkeeper.global.security;
 
-import com.cropkeeper.domain.user.entity.Users;
+import com.cropkeeper.domain.user.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,7 +30,7 @@ import java.util.Collections;
 @AllArgsConstructor
 public class UserPrincipal implements UserDetails {
 
-    private final Users users;  // 우리의 User 엔티티
+    private final Member member;  // 우리의 User 엔티티
 
     /**
      * 권한 목록 반환
@@ -42,7 +42,7 @@ public class UserPrincipal implements UserDetails {
         // UserRole enum을 Spring Security의 권한 형식으로 변환
         // 예: UserRole.USER -> "ROLE_USER"
         return Collections.singleton(
-                new SimpleGrantedAuthority("ROLE_" + users.getRole().name())
+                new SimpleGrantedAuthority("ROLE_" + member.getRole().name())
         );
     }
 
@@ -51,7 +51,7 @@ public class UserPrincipal implements UserDetails {
      */
     @Override
     public String getPassword() {
-        return users.getPassword();
+        return member.getPassword();
     }
 
     /**
@@ -59,7 +59,7 @@ public class UserPrincipal implements UserDetails {
      */
     @Override
     public String getUsername() {
-        return users.getUsername();
+        return member.getUsername();
     }
 
     /**
@@ -102,13 +102,13 @@ public class UserPrincipal implements UserDetails {
      * User 엔티티의 ID 조회 편의 메서드
      */
     public Long getId() {
-        return users.getUserId();
+        return member.getMemberId();
     }
 
     /**
      * User 엔티티의 이름 조회 편의 메서드
      */
     public String getName() {
-        return users.getName();
+        return member.getName();
     }
 }

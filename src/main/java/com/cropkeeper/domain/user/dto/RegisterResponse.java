@@ -1,6 +1,6 @@
 package com.cropkeeper.domain.user.dto;
 
-import com.cropkeeper.domain.user.entity.Users;
+import com.cropkeeper.domain.user.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,10 +17,10 @@ public class RegisterResponse {
     private String name;
     private String role;
 
-    public static RegisterResponse from(Users user) {
+    public static RegisterResponse from(Member user) {
 
         return RegisterResponse.builder()
-                .userId(user.getUserId())
+                .userId(user.getMemberId())
                 .username(user.getUsername())
                 .name(user.getName())
                 .role(user.getRole().name())

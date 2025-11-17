@@ -143,7 +143,7 @@ Follow these conventions when adding code:
 ### Security Best Practices
 - Never commit `application-secret.yml` (add to .gitignore immediately)
 - Use strong, randomly-generated JWT secret keys (minimum 256 bits)
-- Validate all users inputs using Bean Validation (`@Valid`, `@NotNull`, etc.)
+- Validate all member inputs using Bean Validation (`@Valid`, `@NotNull`, etc.)
 - Use parameterized queries (JPA does this by default)
 
 ### Lombok Usage

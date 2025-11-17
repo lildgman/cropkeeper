@@ -4,9 +4,9 @@ import com.cropkeeper.domain.user.dto.LoginRequest;
 import com.cropkeeper.domain.user.dto.LoginResponse;
 import com.cropkeeper.domain.user.dto.RegisterRequest;
 import com.cropkeeper.domain.user.dto.RegisterResponse;
-import com.cropkeeper.domain.user.entity.Users;
-import com.cropkeeper.domain.user.entity.UserRole;
-import com.cropkeeper.domain.user.repository.UserRepository;
+import com.cropkeeper.domain.user.entity.Member;
+import com.cropkeeper.domain.user.entity.MemberRole;
+import com.cropkeeper.domain.user.repository.MemberRepository;
 import com.cropkeeper.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
@@ -48,25 +48,25 @@ public class AuthService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (memberRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("이미 사용 중인 사용자 이름입니다: " + request.getUsername());
         }
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-        Users users = Users.builder()
+        Member member = Member.builder()
                 .username(request.getUsername())
                 .password(encodedPassword)
                 .name(request.getName())
                 .contact(request.getContact())
-                .role(UserRole.USER)  // 회원가입 시 기본 권한은 USER
+                .role(MemberRole.USER)  // 회원가입 시 기본 권한은 USER
                 .farm(null)           // 농장은 나중에 등록
                 .build();
 
-        Users savedUsers = userRepository.save(users);
-        log.info("회원가입 성공: userId={}, username={}", savedUsers.getUserId(), savedUsers.getUsername());
+        Member savedMember = memberRepository.save(member);
+        log.info("회원가입 성공: userId={}, username={}", savedMember.getMemberId(), savedMember.getUsername());
 
-        return RegisterResponse.from(savedUsers);
+        return RegisterResponse.from(savedMember);
     }
 
     /**
@@ -90,14 +90,14 @@ public class AuthService {
         log.info("로그인 인증 성공: {}", request.getUsername());
 
         // 2. 인증된 사용자 정보로 User 조회
-        Users user = userRepository.findByUsername(request.getUsername())
+        Member user = memberRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + request.getUsername()));
 
         // 3. JWT 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUsername());
 
-        log.info("로그인 성공: userId={}, username={}", user.getUserId(), user.getUsername());
+        log.info("로그인 성공: userId={}, username={}", user.getMemberId(), user.getUsername());
 
         // 4. 응답 생성
         return LoginResponse.of(accessToken, refreshToken, user);

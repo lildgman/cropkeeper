@@ -4,9 +4,9 @@ import com.cropkeeper.domain.user.dto.LoginRequest;
 import com.cropkeeper.domain.user.dto.LoginResponse;
 import com.cropkeeper.domain.user.dto.RegisterRequest;
 import com.cropkeeper.domain.user.dto.RegisterResponse;
-import com.cropkeeper.domain.user.entity.UserRole;
-import com.cropkeeper.domain.user.entity.Users;
-import com.cropkeeper.domain.user.repository.UserRepository;
+import com.cropkeeper.domain.user.entity.Member;
+import com.cropkeeper.domain.user.entity.MemberRole;
+import com.cropkeeper.domain.user.repository.MemberRepository;
 import com.cropkeeper.global.security.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 class AuthServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private MemberRepository memberRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -56,18 +56,18 @@ class AuthServiceTest {
                 .contact("01012345678")
                 .build();
 
-        when(userRepository.existsByUsername("testuser01")).thenReturn(false);
+        when(memberRepository.existsByUsername("testuser01")).thenReturn(false);
         when(passwordEncoder.encode("pass1234")).thenReturn("$2a$10$encoded");
 
-        Users savedUser = Users.builder()
-                .userId(1L)
+        Member savedUser = Member.builder()
+                .memberId(1L)
                 .username("testuser01")
                 .password("$2a$10$encoded")
                 .name("홍길동")
-                .role(UserRole.USER)
+                .role(MemberRole.USER)
                 .build();
 
-        when(userRepository.save(any(Users.class))).thenReturn(savedUser);
+        when(memberRepository.save(any(Member.class))).thenReturn(savedUser);
 
         // when
         RegisterResponse response = authService.register(request);
@@ -77,7 +77,7 @@ class AuthServiceTest {
         assertThat(response.getRole()).isEqualTo("USER");
 
         // 검증: save()가 1번 호출되었는지
-        verify(userRepository, times(1)).save(any(Users.class));
+        verify(memberRepository, times(1)).save(any(Member.class));
         // 검증: 저장된 User의 비밀번호가 암호화되었는지
         verify(passwordEncoder, times(1)).encode("pass1234");
     }
@@ -99,8 +99,8 @@ class AuthServiceTest {
                 .hasMessage("비밀번호가 일치하지 않습니다.");
 
         // 검증: 비밀번호 불일치 시 DB 작업이 일어나지 않아야 함
-        verify(userRepository, never()).existsByUsername(anyString());
-        verify(userRepository, never()).save(any(Users.class));
+        verify(memberRepository, never()).existsByUsername(anyString());
+        verify(memberRepository, never()).save(any(Member.class));
     }
 
     @Test
@@ -114,7 +114,7 @@ class AuthServiceTest {
                 .name("홍길동")
                 .build();
 
-        when(userRepository.existsByUsername("existing")).thenReturn(true);
+        when(memberRepository.existsByUsername("existing")).thenReturn(true);
 
         // when & then
         assertThatThrownBy(() -> authService.register(request))
@@ -122,8 +122,8 @@ class AuthServiceTest {
                 .hasMessageContaining("이미 사용 중인 사용자 이름입니다");
 
         // 검증: 중복 체크 후 save()가 호출되지 않아야 함
-        verify(userRepository, times(1)).existsByUsername("existing");
-        verify(userRepository, never()).save(any(Users.class));
+        verify(memberRepository, times(1)).existsByUsername("existing");
+        verify(memberRepository, never()).save(any(Member.class));
     }
 
     @Test
@@ -135,18 +135,18 @@ class AuthServiceTest {
                 .password("pass1234")
                 .build();
 
-        Users user = Users.builder()
-                .userId(1L)
+        Member user = Member.builder()
+                .memberId(1L)
                 .username("testuser01")
                 .password("$2a$10$encoded")
                 .name("홍길동")
-                .role(UserRole.USER)
+                .role(MemberRole.USER)
                 .build();
 
         // Mock 설정
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(null);  // 인증 성공 (반환값은 사용 안함)
-        when(userRepository.findByUsername("testuser01")).thenReturn(Optional.of(user));
+        when(memberRepository.findByUsername("testuser01")).thenReturn(Optional.of(user));
 
         when(jwtTokenProvider.generateAccessToken("testuser01")).thenReturn("access-token-123");
         when(jwtTokenProvider.generateRefreshToken("testuser01")).thenReturn("refresh-token-123");
@@ -198,15 +198,15 @@ class AuthServiceTest {
                 .name("홍길동")
                 .build();
 
-        when(userRepository.existsByUsername(anyString())).thenReturn(false);
+        when(memberRepository.existsByUsername(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("encoded");
 
-        Users savedUser = Users.builder()
-                .userId(1L)
+        Member savedUser = Member.builder()
+                .memberId(1L)
                 .username("testuser01")
-                .role(UserRole.USER)
+                .role(MemberRole.USER)
                 .build();
-        when(userRepository.save(any(Users.class))).thenReturn(savedUser);
+        when(memberRepository.save(any(Member.class))).thenReturn(savedUser);
 
         // when
         RegisterResponse response = authService.register(request);
@@ -215,8 +215,8 @@ class AuthServiceTest {
         assertThat(response.getRole()).isEqualTo("USER");
 
         // 검증: save() 호출 시 role이 USER로 설정되었는지 확인
-        verify(userRepository).save(argThat(user ->
-                user.getRole() == UserRole.USER
+        verify(memberRepository).save(argThat(user ->
+                user.getRole() == MemberRole.USER
         ));
     }
 }

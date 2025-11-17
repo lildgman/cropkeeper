@@ -2,7 +2,7 @@ package com.cropkeeper.domain.user.controller;
 
 import com.cropkeeper.domain.user.dto.LoginRequest;
 import com.cropkeeper.domain.user.dto.RegisterRequest;
-import com.cropkeeper.domain.user.repository.UserRepository;
+import com.cropkeeper.domain.user.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,16 +19,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * AuthController 통합 테스트
- *
- * 실제 Spring Context를 띄워서 전체 흐름을 테스트
- * - 회원가입/로그인 API 검증
- * - 성공/실패 케이스 모두 테스트
- */
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional  // 각 테스트 후 DB 롤백
+@Transactional
 class AuthControllerTest {
 
     @Autowired
@@ -38,12 +31,12 @@ class AuthControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private UserRepository userRepository;
+    private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
         // 각 테스트 전에 DB 정리
-        userRepository.deleteAll();
+        memberRepository.deleteAll();
     }
 
     @Test

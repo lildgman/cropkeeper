@@ -1,6 +1,6 @@
 package com.cropkeeper.domain.user.dto;
 
-import com.cropkeeper.domain.user.entity.Users;
+import com.cropkeeper.domain.user.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,13 +20,13 @@ public class LoginResponse {
     private String name;
     private String role;
 
-    public static LoginResponse of(String accessToken, String refreshToken, Users user) {
+    public static LoginResponse of(String accessToken, String refreshToken, Member user) {
 
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
-                .userId(user.getUserId())
+                .userId(user.getMemberId())
                 .username(user.getUsername())
                 .name(user.getName())
                 .role(user.getRole().name())
