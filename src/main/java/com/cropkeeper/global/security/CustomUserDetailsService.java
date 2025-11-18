@@ -1,7 +1,8 @@
 package com.cropkeeper.global.security;
 
-import com.cropkeeper.domain.user.entity.Member;
-import com.cropkeeper.domain.user.repository.MemberRepository;
+import com.cropkeeper.domain.auth.exception.DeletedMemberLoginException;
+import com.cropkeeper.domain.member.entity.Member;
+import com.cropkeeper.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -45,6 +46,11 @@ public class CustomUserDetailsService implements UserDetailsService {
                         "사용자를 찾을 수 없습니다: " + username
                 ));
 
+        // 2. 탈퇴한 회원인지 확인
+        if (member.isDeleted()) {
+            throw new DeletedMemberLoginException(username);
+        }
+
         // 2. User 엔티티를 UserPrincipal로 변환하여 반환
         return new UserPrincipal(member);
     }
@@ -64,6 +70,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "사용자를 찾을 수 없습니다. ID: " + userId
                 ));
+
+        if (member.isDeleted()) {
+            throw new DeletedMemberLoginException(member.getUsername());
+        }
 
         return new UserPrincipal(member);
     }

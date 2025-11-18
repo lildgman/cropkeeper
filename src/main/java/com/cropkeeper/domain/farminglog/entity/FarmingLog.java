@@ -1,7 +1,7 @@
 package com.cropkeeper.domain.farminglog.entity;
 
 import com.cropkeeper.domain.farm.entity.Farm;
-import com.cropkeeper.domain.user.entity.Member;
+import com.cropkeeper.domain.member.entity.Member;
 import com.cropkeeper.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;

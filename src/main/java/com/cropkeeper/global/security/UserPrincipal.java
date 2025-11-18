@@ -1,6 +1,6 @@
 package com.cropkeeper.global.security;
 
-import com.cropkeeper.domain.user.entity.Member;
+import com.cropkeeper.domain.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;

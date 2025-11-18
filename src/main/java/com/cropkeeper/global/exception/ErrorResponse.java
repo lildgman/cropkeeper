@@ -20,20 +20,31 @@ public class ErrorResponse {
 
     private LocalDateTime timestamp;  // 에러 발생 시간
     private int status;               // HTTP 상태 코드
-    private String error;             // 에러 타입 (예: "Bad Request")
+    private String errorCode;
     private String message;           // 사용자에게 보여줄 메시지
     private String path;              // 에러가 발생한 API 경로
 
     /**
      * 에러 응답 생성 편의 메서드
      */
-    public static ErrorResponse of(int status, String error, String message, String path) {
+    public static ErrorResponse of(int status, String errorCode, String message, String path) {
         return ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(status)
-                .error(error)
+                .errorCode(errorCode)
                 .message(message)
                 .path(path)
                 .build();
     }
+
+    public static ErrorResponse of(int status, String message, String path) {
+        return ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(status)
+                .errorCode(null)
+                .message(message)
+                .path(path)
+                .build();
+    }
+
 }
