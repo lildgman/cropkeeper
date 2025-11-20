@@ -4,9 +4,9 @@ import com.cropkeeper.global.exception.BaseException;
 import lombok.Getter;
 
 @Getter
-public class ForbiddenAccessException extends BaseException {
+public class ForbiddenMemberAccessException extends BaseException {
 
-    public ForbiddenAccessException(MemberErrorCode errorCode) {
+    public ForbiddenMemberAccessException(MemberErrorCode errorCode) {
         super(errorCode);
     }
 }

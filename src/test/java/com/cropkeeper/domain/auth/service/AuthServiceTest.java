@@ -186,7 +186,7 @@ class AuthServiceTest {
         // when & then
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(InvalidCredentialsException.class)
-                .hasMessage("아이디 또는 비밀번호가 일치하지 않습니다.");
+                .hasMessage("아이디 또는 비밀번호가 올바르지 않습니다.");
 
         // 검증: 인증 실패 시 토큰이 생성되지 않아야 함
         verify(jwtTokenProvider, never()).generateAccessToken(anyString());

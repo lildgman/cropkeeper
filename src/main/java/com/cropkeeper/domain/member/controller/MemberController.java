@@ -4,7 +4,7 @@ import com.cropkeeper.domain.member.dto.response.MemberResponse;
 import com.cropkeeper.domain.member.dto.request.UpdateMemberInfoRequest;
 import com.cropkeeper.domain.member.dto.request.UpdatePasswordRequest;
 import com.cropkeeper.domain.member.entity.Member;
-import com.cropkeeper.domain.member.exception.ForbiddenAccessException;
+import com.cropkeeper.domain.member.exception.ForbiddenMemberAccessException;
 import com.cropkeeper.domain.member.exception.MemberErrorCode;
 import com.cropkeeper.domain.member.service.MemberService;
 import com.cropkeeper.global.security.UserPrincipal;
@@ -39,7 +39,7 @@ public class MemberController {
 
         if (!memberId.equals(userPrincipal.getId())) {
             log.warn("권한 없는 회원 정보 조회 시도: 요청 memberId = {}, 실제 memberId = {}", memberId, userPrincipal.getId());
-            throw new ForbiddenAccessException(MemberErrorCode.FORBIDDEN_ACCESS);
+            throw new ForbiddenMemberAccessException(MemberErrorCode.FORBIDDEN_ACCESS);
         }
 
         Member member = memberService.findById(memberId);
@@ -68,11 +68,10 @@ public class MemberController {
         if (!memberId.equals(userPrincipal.getId())) {
             log.warn("권한 없는 회원 정보 수정 시도: 요청 memberId = {}, 실제 memberId = {}",
                     memberId, userPrincipal.getId());
-            throw new ForbiddenAccessException(MemberErrorCode.FORBIDDEN_ACCESS);
+            throw new ForbiddenMemberAccessException(MemberErrorCode.FORBIDDEN_ACCESS);
         }
 
-        Member updatedMember = memberService.updateMemberInfo(memberId, request);
-        MemberResponse response = MemberResponse.from(updatedMember);
+        MemberResponse response = memberService.updateMemberInfo(memberId, request);
 
         return ResponseEntity.ok(response);
     }
@@ -97,7 +96,7 @@ public class MemberController {
         if (!memberId.equals(userPrincipal.getId())) {
             log.warn("권한 없는 비밀번호 변경 시도: 요청 memberId = {}, 실제 memberId = {}",
                     memberId, userPrincipal.getId());
-            throw new ForbiddenAccessException(MemberErrorCode.FORBIDDEN_ACCESS);
+            throw new ForbiddenMemberAccessException(MemberErrorCode.FORBIDDEN_ACCESS);
         }
 
         memberService.changePassword(memberId, request);
@@ -123,7 +122,7 @@ public class MemberController {
         if (!memberId.equals(userPrincipal.getId())) {
             log.warn("권한 없는 회원 탈퇴 시도: 요청 memberId = {}, 실제 memberId = {}",
                     memberId, userPrincipal.getId());
-            throw new ForbiddenAccessException(MemberErrorCode.FORBIDDEN_ACCESS);
+            throw new ForbiddenMemberAccessException(MemberErrorCode.FORBIDDEN_ACCESS);
         }
 
         memberService.deleteMember(memberId);

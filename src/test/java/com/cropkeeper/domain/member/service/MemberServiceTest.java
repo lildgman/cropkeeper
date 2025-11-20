@@ -2,6 +2,7 @@ package com.cropkeeper.domain.member.service;
 
 import com.cropkeeper.domain.member.dto.request.UpdateMemberInfoRequest;
 import com.cropkeeper.domain.member.dto.request.UpdatePasswordRequest;
+import com.cropkeeper.domain.member.dto.response.MemberResponse;
 import com.cropkeeper.domain.member.entity.Member;
 import com.cropkeeper.domain.member.entity.MemberRole;
 import com.cropkeeper.domain.member.exception.AlreadyDeletedException;
@@ -102,11 +103,11 @@ class MemberServiceTest {
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
 
         // when
-        Member updatedMember = memberService.updateMemberInfo(memberId, request);
+        MemberResponse memberResponse = memberService.updateMemberInfo(memberId, request);
 
         // then
-        assertThat(updatedMember.getName()).isEqualTo("test02");
-        assertThat(updatedMember.getContact()).isEqualTo("01098774423");
+        assertThat(memberResponse.getName()).isEqualTo("test02");
+        assertThat(memberResponse.getContact()).isEqualTo("01098774423");
 
         verify(memberRepository, times(1)).findById(memberId);
 
@@ -135,11 +136,11 @@ class MemberServiceTest {
 
         // when
 
-        Member updatedMember = memberService.updateMemberInfo(memberId, request);
+        MemberResponse memberResponse = memberService.updateMemberInfo(memberId, request);
 
         // then
-        assertThat(updatedMember.getName()).isEqualTo("test02");
-        assertThat(updatedMember.getContact()).isEqualTo("01012345678");
+        assertThat(memberResponse.getName()).isEqualTo("test02");
+        assertThat(memberResponse.getContact()).isEqualTo("01012345678");
 
         verify(memberRepository, times(1)).findById(memberId);
     }
@@ -166,11 +167,11 @@ class MemberServiceTest {
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
 
         // when
-        Member updatedMember = memberService.updateMemberInfo(memberId, request);
+        MemberResponse memberResponse = memberService.updateMemberInfo(memberId, request);
 
         // then
-        assertThat(updatedMember.getName()).isEqualTo("test01");
-        assertThat(updatedMember.getContact()).isEqualTo("01098765432");
+        assertThat(memberResponse.getName()).isEqualTo("test01");
+        assertThat(memberResponse.getContact()).isEqualTo("01098765432");
 
         verify(memberRepository, times(1)).findById(memberId);
     }

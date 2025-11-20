@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "member")
@@ -36,9 +38,9 @@ public class Member extends BaseTimeEntity {
     @Column(name = "role", nullable = false)
     private MemberRole role;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "farm_id", nullable = true)
-    private Farm farm;
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Farm> farms = new ArrayList<>();
 
     @Column(name = "deleted", nullable = false)
     @Builder.Default

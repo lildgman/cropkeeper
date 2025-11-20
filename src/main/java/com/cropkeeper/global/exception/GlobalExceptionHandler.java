@@ -149,7 +149,7 @@ public class GlobalExceptionHandler {
         response.put("status", HttpStatus.BAD_REQUEST.value());
         response.put("message", "입력값 검증에 실패했습니다.");
         response.put("errors", errors);
-        response.put("paht", request.getRequestURI());
+        response.put("path", request.getRequestURI());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(response);

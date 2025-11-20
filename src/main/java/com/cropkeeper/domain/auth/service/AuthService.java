@@ -10,7 +10,6 @@ import com.cropkeeper.domain.auth.exception.RegisterPasswordMismatchException;
 import com.cropkeeper.domain.member.entity.Member;
 import com.cropkeeper.domain.member.entity.MemberRole;
 import com.cropkeeper.domain.auth.exception.DuplicateUsernameException;
-import com.cropkeeper.domain.member.exception.InvalidMemberRequestException;
 import com.cropkeeper.domain.member.exception.MemberNotFoundException;
 import com.cropkeeper.domain.member.repository.MemberRepository;
 import com.cropkeeper.global.security.JwtTokenProvider;
@@ -68,7 +67,6 @@ public class AuthService {
                 .name(request.getName())
                 .contact(request.getContact())
                 .role(MemberRole.USER)
-                .farm(null)
                 .build();
 
         Member savedMember = memberRepository.save(member);

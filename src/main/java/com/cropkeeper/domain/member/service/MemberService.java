@@ -2,6 +2,7 @@ package com.cropkeeper.domain.member.service;
 
 import com.cropkeeper.domain.member.dto.request.UpdateMemberInfoRequest;
 import com.cropkeeper.domain.member.dto.request.UpdatePasswordRequest;
+import com.cropkeeper.domain.member.dto.response.MemberResponse;
 import com.cropkeeper.domain.member.entity.Member;
 import com.cropkeeper.domain.member.exception.*;
 import com.cropkeeper.domain.member.repository.MemberRepository;
@@ -40,7 +41,7 @@ public class MemberService {
      * @throws InvalidMemberRequestException 수정할 필드가 없는 경우
      */
     @Transactional
-    public Member updateMemberInfo(Long memberId, UpdateMemberInfoRequest request) {
+    public MemberResponse updateMemberInfo(Long memberId, UpdateMemberInfoRequest request) {
 
         if (!request.hasLeastOneField()) {
             throw new InvalidMemberRequestException(MemberErrorCode.NO_FIELD_TO_UPDATE);
@@ -53,7 +54,7 @@ public class MemberService {
         log.info("회원 정보 수정 완료: memberId = {}, name = {}, contact = {}",
                 memberId, request.getName(), request.getContact());
 
-        return member;
+        return MemberResponse.from(member);
     }
 
     /**
