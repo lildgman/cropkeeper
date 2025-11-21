@@ -45,8 +45,8 @@ class AuthControllerTest {
         // given
         RegisterRequest request = RegisterRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("홍길동")
                 .contact("01012345678")
                 .build();
@@ -68,8 +68,8 @@ class AuthControllerTest {
         // given
         RegisterRequest request = RegisterRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
-                .passwordConfirm("pass5678")  // 다름!
+                .password("Pass123!")
+                .passwordConfirm("Test456@")  // 다름!
                 .name("홍길동")
                 .contact("01012345678")
                 .build();
@@ -89,8 +89,8 @@ class AuthControllerTest {
         // given - 이미 존재하는 사용자 생성
         RegisterRequest firstRequest = RegisterRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("홍길동")
                 .contact("01012345678")
                 .build();
@@ -102,8 +102,8 @@ class AuthControllerTest {
         // when & then - 같은 사용자 이름으로 재가입 시도
         RegisterRequest duplicateRequest = RegisterRequest.builder()
                 .username("testuser01")  // 중복!
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("김철수")
                 .build();
 
@@ -121,8 +121,8 @@ class AuthControllerTest {
         // given
         RegisterRequest request = RegisterRequest.builder()
                 .username("abc")  // 4자 미만
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("홍길동")
                 .build();
 
@@ -142,8 +142,8 @@ class AuthControllerTest {
         // given
         RegisterRequest request = RegisterRequest.builder()
                 .username("test-user")  // 하이픈 포함
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("홍길동")
                 .build();
 
@@ -162,8 +162,8 @@ class AuthControllerTest {
         // given
         RegisterRequest request = RegisterRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("홍길동")
                 .contact("1012345678")  // 0으로 시작 안함
                 .build();
@@ -183,8 +183,8 @@ class AuthControllerTest {
         // given - 먼저 회원가입
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("홍길동")
                 .build();
 
@@ -195,7 +195,7 @@ class AuthControllerTest {
         // when & then - 로그인
         LoginRequest loginRequest = LoginRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
+                .password("Pass123!")
                 .build();
 
         mockMvc.perform(post("/api/auth/login")
@@ -215,8 +215,8 @@ class AuthControllerTest {
         // given - 먼저 회원가입
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("홍길동")
                 .build();
 
@@ -227,7 +227,7 @@ class AuthControllerTest {
         // when & then - 잘못된 비밀번호로 로그인
         LoginRequest loginRequest = LoginRequest.builder()
                 .username("testuser01")
-                .password("wrongpass")  // 틀린 비밀번호
+                .password("Wrong789#")  // 틀린 비밀번호
                 .build();
 
         mockMvc.perform(post("/api/auth/login")
@@ -244,7 +244,7 @@ class AuthControllerTest {
         // given
         LoginRequest loginRequest = LoginRequest.builder()
                 .username("nonexist")
-                .password("pass1234")
+                .password("Pass123!")
                 .build();
 
         // when & then

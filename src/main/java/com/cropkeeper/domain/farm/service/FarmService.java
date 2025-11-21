@@ -6,7 +6,6 @@ import com.cropkeeper.domain.farm.dto.response.FarmResponse;
 import com.cropkeeper.domain.farm.entity.Farm;
 import com.cropkeeper.domain.farm.exception.FarmErrorCode;
 import com.cropkeeper.domain.farm.exception.FarmNotFoundException;
-import com.cropkeeper.domain.farm.exception.ForbiddenFarmAccessException;
 import com.cropkeeper.domain.farm.exception.InvalidFarmRequestException;
 import com.cropkeeper.domain.farm.repository.FarmRepository;
 import com.cropkeeper.domain.member.entity.Member;

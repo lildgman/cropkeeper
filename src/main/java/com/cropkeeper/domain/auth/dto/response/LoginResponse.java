@@ -15,21 +15,21 @@ public class LoginResponse {
     private String accessToken;
     private String refreshToken;
     private String tokenType;
-    private Long userId;
+    private Long memberId;
     private String username;
     private String name;
     private String role;
 
-    public static LoginResponse of(String accessToken, String refreshToken, Member user) {
+    public static LoginResponse of(String accessToken, String refreshToken, Member member) {
 
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
-                .userId(user.getMemberId())
-                .username(user.getUsername())
-                .name(user.getName())
-                .role(user.getRole().name())
+                .memberId(member.getMemberId())
+                .username(member.getUsername())
+                .name(member.getName())
+                .role(member.getRole().name())
                 .build();
     }
 }

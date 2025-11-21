@@ -10,16 +10,15 @@ import com.cropkeeper.domain.auth.exception.RegisterPasswordMismatchException;
 import com.cropkeeper.domain.member.entity.Member;
 import com.cropkeeper.domain.member.entity.MemberRole;
 import com.cropkeeper.domain.auth.exception.DuplicateUsernameException;
-import com.cropkeeper.domain.member.exception.MemberNotFoundException;
 import com.cropkeeper.domain.member.repository.MemberRepository;
 import com.cropkeeper.global.security.JwtTokenProvider;
+import com.cropkeeper.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,29 +84,30 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) {
         log.info("로그인 시도: {}", request.getUsername());
 
+        // AuthenticationManager로 인증 (내부적으로 CustomUserDetailsService.loadUserByUsername 호출)
+        Authentication authentication;
         try {
-            // AuthenticationManager로 인증
-            Authentication authentication = authenticationManager.authenticate(
+            authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
                             request.getPassword()
                     )
             );
-
             log.info("로그인 인증 성공: {}", request.getUsername());
         } catch (BadCredentialsException e) {
             log.warn("로그인 실패: 잘못된 자격증명 - username: {}", request.getUsername());
             throw new InvalidCredentialsException();
         }
 
-        Member user = memberRepository.findByUsername(request.getUsername())
-                .orElseThrow(MemberNotFoundException::new);
+        // 인증된 사용자 정보 가져오기 (DB 재조회 없이)
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        Member member = userPrincipal.getMember();
 
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername());
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUsername());
+        String accessToken = jwtTokenProvider.generateAccessToken(member.getUsername());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(member.getUsername());
 
-        log.info("로그인 성공: userId={}, username={}", user.getMemberId(), user.getUsername());
+        log.info("로그인 성공: memberId={}, username={}", member.getMemberId(), member.getUsername());
 
-        return LoginResponse.of(accessToken, refreshToken, user);
+        return LoginResponse.of(accessToken, refreshToken, member);
     }
 }

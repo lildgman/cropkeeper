@@ -22,14 +22,25 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * 회원 ID로 회원 조회
-     * @param memberId
+     * 회원 ID로 회원 조회 (내부 사용용)
+     * @param memberId 회원 ID
      * @return 회원 엔티티
      * @throws MemberNotFoundException 회원을 찾을 수 없는 경우
      */
-    public Member findById(Long memberId) {
+    private Member findById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
+    }
+
+    /**
+     * 회원 정보 조회 (외부 API용)
+     * @param memberId 회원 ID
+     * @return 회원 정보 DTO
+     * @throws MemberNotFoundException 회원을 찾을 수 없는 경우
+     */
+    public MemberResponse getMemberInfo(Long memberId) {
+        Member member = findById(memberId);
+        return MemberResponse.from(member);
     }
 
     /**
@@ -43,13 +54,19 @@ public class MemberService {
     @Transactional
     public MemberResponse updateMemberInfo(Long memberId, UpdateMemberInfoRequest request) {
 
-        if (!request.hasLeastOneField()) {
+        if (!request.hasAtLeastOneField()) {
             throw new InvalidMemberRequestException(MemberErrorCode.NO_FIELD_TO_UPDATE);
         }
 
         Member member = findById(memberId);
 
-        member.updateInfo(request.getName(), request.getContact());
+        // null이 아닌 필드만 업데이트
+        if (request.getName() != null && !request.getName().isEmpty()) {
+            member.updateName(request.getName());
+        }
+        if (request.getContact() != null && !request.getContact().isEmpty()) {
+            member.updateContact(request.getContact());
+        }
 
         log.info("회원 정보 수정 완료: memberId = {}, name = {}, contact = {}",
                 memberId, request.getName(), request.getContact());
@@ -70,18 +87,21 @@ public class MemberService {
 
         log.info("비밀번호 변경 시도: memberId = {}", memberId);
 
-        Member member = findById(memberId);
-
-        if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
-            log.warn("비밀번호 변경 실패: 현재 비밀번호 불일치 - memberId = {}", memberId);
-            throw new PasswordMismatchException(MemberErrorCode.CURRENT_PASSWORD_MISMATCH);
-        }
-
+        // 1. 새 비밀번호 확인 일치 검증 (비용 낮음 - 먼저 수행)
         if (!request.getNewPassword().equals(request.getNewPasswordConfirm())) {
             log.warn("비밀번호 변경 실패: 새 비밀번호 불일치 - memberId = {}", memberId);
             throw new PasswordMismatchException(MemberErrorCode.NEW_PASSWORD_MISMATCH);
         }
 
+        Member member = findById(memberId);
+
+        // 2. 현재 비밀번호 검증 (암호화 비교 - 비용 높음)
+        if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
+            log.warn("비밀번호 변경 실패: 현재 비밀번호 불일치 - memberId = {}", memberId);
+            throw new PasswordMismatchException(MemberErrorCode.CURRENT_PASSWORD_MISMATCH);
+        }
+
+        // 3. 새 비밀번호와 현재 비밀번호 동일 검증 (암호화 비교)
         if (passwordEncoder.matches(request.getNewPassword(), member.getPassword())) {
             log.warn("비밀번호 변경 실패: 새 비밀번호가 현재 비밀번호와 동일 - memberId = {}", memberId);
             throw new InvalidMemberRequestException(MemberErrorCode.SAME_AS_CURRENT_PASSWORD);

@@ -31,9 +31,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 
     /**
-     * username 중복체크
+     * username 중복체크 (탈퇴하지 않은 회원만)
      * @param username 사용자 이름
      * @return username 중복여부
      */
-    boolean existsByUsername(String username);
+    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM Member m WHERE m.username = :username AND m.deleted = false")
+    boolean existsByUsername(@Param("username") String username);
 }

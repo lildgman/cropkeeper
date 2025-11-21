@@ -13,6 +13,7 @@ import com.cropkeeper.domain.auth.exception.DuplicateUsernameException;
 import com.cropkeeper.domain.member.exception.PasswordMismatchException;
 import com.cropkeeper.domain.member.repository.MemberRepository;
 import com.cropkeeper.global.security.JwtTokenProvider;
+import com.cropkeeper.global.security.UserPrincipal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -56,14 +58,14 @@ class AuthServiceTest {
         // given
         RegisterRequest request = RegisterRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("홍길동")
                 .contact("01012345678")
                 .build();
 
         when(memberRepository.existsByUsername("testuser01")).thenReturn(false);
-        when(passwordEncoder.encode("pass1234")).thenReturn("$2a$10$encoded");
+        when(passwordEncoder.encode("Pass123!")).thenReturn("$2a$10$encoded");
 
         Member savedUser = Member.builder()
                 .memberId(1L)
@@ -85,7 +87,7 @@ class AuthServiceTest {
         // 검증: save()가 1번 호출되었는지
         verify(memberRepository, times(1)).save(any(Member.class));
         // 검증: 저장된 User의 비밀번호가 암호화되었는지
-        verify(passwordEncoder, times(1)).encode("pass1234");
+        verify(passwordEncoder, times(1)).encode("Pass123!");
     }
 
     @Test
@@ -94,8 +96,8 @@ class AuthServiceTest {
         // given
         RegisterRequest request = RegisterRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
-                .passwordConfirm("pass5678")
+                .password("Pass123!")
+                .passwordConfirm("Test456@")
                 .name("홍길동")
                 .build();
 
@@ -115,8 +117,8 @@ class AuthServiceTest {
         // given
         RegisterRequest request = RegisterRequest.builder()
                 .username("existing")
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("홍길동")
                 .build();
 
@@ -138,7 +140,7 @@ class AuthServiceTest {
         // given
         LoginRequest request = LoginRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
+                .password("Pass123!")
                 .build();
 
         Member user = Member.builder()
@@ -149,10 +151,13 @@ class AuthServiceTest {
                 .role(MemberRole.USER)
                 .build();
 
+        UserPrincipal userPrincipal = new UserPrincipal(user);
+
         // Mock 설정
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(userPrincipal);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(null);  // 인증 성공 (반환값은 사용 안함)
-        when(memberRepository.findByUsername("testuser01")).thenReturn(Optional.of(user));
+                .thenReturn(authentication);
 
         when(jwtTokenProvider.generateAccessToken("testuser01")).thenReturn("access-token-123");
         when(jwtTokenProvider.generateRefreshToken("testuser01")).thenReturn("refresh-token-123");
@@ -177,7 +182,7 @@ class AuthServiceTest {
         // given
         LoginRequest request = LoginRequest.builder()
                 .username("testuser01")
-                .password("wrongpass")
+                .password("Wrong789#")
                 .build();
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
@@ -199,8 +204,8 @@ class AuthServiceTest {
         // given
         RegisterRequest request = RegisterRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("홍길동")
                 .build();
 
@@ -232,7 +237,7 @@ class AuthServiceTest {
 
         LoginRequest request = LoginRequest.builder()
                 .username("deleteUser")
-                .password("pass1234")
+                .password("Pass123!")
                 .build();
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
@@ -253,7 +258,7 @@ class AuthServiceTest {
 
         LoginRequest request = LoginRequest.builder()
                 .username("testusername")
-                .password("pass1234")
+                .password("Pass123!")
                 .build();
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))

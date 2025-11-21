@@ -12,18 +12,18 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RegisterResponse {
 
-    private Long userId;
+    private Long memberId;
     private String username;
     private String name;
     private String role;
 
-    public static RegisterResponse from(Member user) {
+    public static RegisterResponse from(Member member) {
 
         return RegisterResponse.builder()
-                .userId(user.getMemberId())
-                .username(user.getUsername())
-                .name(user.getName())
-                .role(user.getRole().name())
+                .memberId(member.getMemberId())
+                .username(member.getUsername())
+                .name(member.getName())
+                .role(member.getRole().name())
                 .build();
     }
 }

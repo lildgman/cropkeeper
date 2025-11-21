@@ -49,8 +49,8 @@ class MemberControllerTest {
         // 테스트용 회원 생성
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("test01")
                 .contact("01012345678")
                 .build();
@@ -65,7 +65,7 @@ class MemberControllerTest {
 
         LoginRequest loginRequest = LoginRequest.builder()
                 .username("testuser01")
-                .password("pass1234")
+                .password("Pass123!")
                 .build();
 
         String loginResponse = mockMvc.perform(post("/api/auth/login")
@@ -261,9 +261,9 @@ class MemberControllerTest {
     void changePassword_Success() throws Exception {
 
         UpdatePasswordRequest request = UpdatePasswordRequest.builder()
-                .currentPassword("pass1234")
-                .newPassword("newPass1234")
-                .newPasswordConfirm("newPass1234")
+                .currentPassword("Pass123!")
+                .newPassword("NewPass1!")
+                .newPasswordConfirm("NewPass1!")
                 .build();
 
         mockMvc.perform(patch("/api/members/{memberId}/password", testMemberId)
@@ -275,7 +275,7 @@ class MemberControllerTest {
 
         LoginRequest newLogin = LoginRequest.builder()
                 .username("testuser01")
-                .password("newPass1234")
+                .password("NewPass1!")
                 .build();
 
         mockMvc.perform(post("/api/auth/login")
@@ -291,9 +291,9 @@ class MemberControllerTest {
 
         // given
         UpdatePasswordRequest request = UpdatePasswordRequest.builder()
-                .currentPassword("pass1234")
-                .newPassword("newPass1234")
-                .newPasswordConfirm("newPass1234")
+                .currentPassword("Pass123!")
+                .newPassword("NewPass1!")
+                .newPasswordConfirm("NewPass1!")
                 .build();
 
         // when ,then
@@ -310,8 +310,8 @@ class MemberControllerTest {
 
         RegisterRequest anotherUser = RegisterRequest.builder()
                 .username("testuser02")
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("test02")
                 .contact("01098765432")
                 .build();
@@ -325,9 +325,9 @@ class MemberControllerTest {
         Long anotherMemberId = anotherMember.getMemberId();
 
         UpdatePasswordRequest request = UpdatePasswordRequest.builder()
-                .currentPassword("pass1234")
-                .newPassword("newPass1234")
-                .newPasswordConfirm("newPass1234")
+                .currentPassword("Pass123!")
+                .newPassword("NewPass1!")
+                .newPasswordConfirm("NewPass1!")
                 .build();
 
         mockMvc.perform(patch("/api/members/{memberId}/password", anotherMemberId)
@@ -344,9 +344,9 @@ class MemberControllerTest {
     void changePassword_Fail_WrongPassword() throws Exception {
 
         UpdatePasswordRequest request = UpdatePasswordRequest.builder()
-                .currentPassword("wrongPass1234")
-                .newPassword("newPass1234")
-                .newPasswordConfirm("newPass1234")
+                .currentPassword("Wrong789#")
+                .newPassword("NewPass1!")
+                .newPasswordConfirm("NewPass1!")
                 .build();
 
         mockMvc.perform(patch("/api/members/{memberId}/password", testMemberId)
@@ -363,9 +363,9 @@ class MemberControllerTest {
     void changePassword_Fail_NewPasswordMismatch() throws Exception {
 
         UpdatePasswordRequest request = UpdatePasswordRequest.builder()
-                .currentPassword("pass1234")
-                .newPassword("newPass1234")
-                .newPasswordConfirm("diffPass1234")
+                .currentPassword("Pass123!")
+                .newPassword("NewPass1!")
+                .newPasswordConfirm("DiffPass1@")
                 .build();
 
         mockMvc.perform(patch("/api/members/{memberId}/password", testMemberId)
@@ -383,9 +383,9 @@ class MemberControllerTest {
     void changePassword_Fail_SameCurrentPassword() throws Exception {
 
         UpdatePasswordRequest request = UpdatePasswordRequest.builder()
-                .currentPassword("pass1234")
-                .newPassword("pass1234")
-                .newPasswordConfirm("pass1234")
+                .currentPassword("Pass123!")
+                .newPassword("Pass123!")
+                .newPasswordConfirm("Pass123!")
                 .build();
 
         mockMvc.perform(patch("/api/members/{memberId}/password", testMemberId)
@@ -403,9 +403,9 @@ class MemberControllerTest {
     void changePassword_Fail_LongNewPassword() throws Exception {
 
         UpdatePasswordRequest request = UpdatePasswordRequest.builder()
-                .currentPassword("pass1234")
-                .newPassword("a".repeat(20))
-                .newPasswordConfirm("a".repeat(20))
+                .currentPassword("Pass123!")
+                .newPassword("VeryLongPass123!@#$%&")  // 21자
+                .newPasswordConfirm("VeryLongPass123!@#$%&")
                 .build();
 
         mockMvc.perform(patch("/api/members/{memberId}/password", testMemberId)
@@ -415,7 +415,7 @@ class MemberControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("입력값 검증에 실패했습니다."))
-                .andExpect(jsonPath("$.errors.newPassword").value(containsString("16자 이하")));
+                .andExpect(jsonPath("$.errors.newPassword").value(containsString("20자 이하")));
 
     }
 
@@ -423,7 +423,7 @@ class MemberControllerTest {
     @DisplayName("비밀번호 변경 실패 - 값 누락")
     void changePassword_Fail_MissingFields() throws Exception {
 
-        String requestJson = "{\"currentPassword\": \"pass1234\"}";
+        String requestJson = "{\"currentPassword\": \"Pass123!\"}";
 
         mockMvc.perform(patch("/api/members/{memberId}/password", testMemberId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -473,8 +473,8 @@ class MemberControllerTest {
 
         RegisterRequest anotherUserRequest = RegisterRequest.builder()
                 .username("testuser02")
-                .password("pass1234")
-                .passwordConfirm("pass1234")
+                .password("Pass123!")
+                .passwordConfirm("Pass123!")
                 .name("test02")
                 .contact("01098765432")
                 .build();

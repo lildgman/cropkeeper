@@ -91,11 +91,11 @@ public class UserPrincipal implements UserDetails {
 
     /**
      * 계정 활성화 여부
-     * @return true면 활성화됨
+     * @return true면 활성화됨 (탈퇴한 회원은 비활성화)
      */
     @Override
     public boolean isEnabled() {
-        return true;  // 우리 시스템에서는 모든 계정이 활성화됨
+        return !member.isDeleted();
     }
 
     /**

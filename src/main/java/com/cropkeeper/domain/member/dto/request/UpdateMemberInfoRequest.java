@@ -19,7 +19,7 @@ public class UpdateMemberInfoRequest {
     @Pattern(regexp = "^01[0-9]{8,9}$", message = "올바른 휴대폰 번호 형식이 아닙니다. (예: 01012345678)")
     private String contact;
 
-    public boolean hasLeastOneField() {
+    public boolean hasAtLeastOneField() {
         return (name != null && !name.isEmpty()) ||
                 (contact != null && !contact.isEmpty());
     }

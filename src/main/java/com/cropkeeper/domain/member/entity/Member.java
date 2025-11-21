@@ -19,7 +19,7 @@ public class Member extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "member_id")
     private Long memberId;
 
     @Column(name = "username", nullable = false, unique = true, length = 50)
@@ -62,15 +62,14 @@ public class Member extends BaseTimeEntity {
         return this.deleted;
     }
 
-    // 회원 정보 변경
-    public void updateInfo(String name, String contact) {
-        if (name != null && !name.isEmpty()) {
-            this.name = name;
-        }
+    // 이름 변경
+    public void updateName(String name) {
+        this.name = name;
+    }
 
-        if (contact != null && !contact.isEmpty()) {
-            this.contact = contact;
-        }
+    // 연락처 변경
+    public void updateContact(String contact) {
+        this.contact = contact;
     }
 
     // 비밀번호 변경

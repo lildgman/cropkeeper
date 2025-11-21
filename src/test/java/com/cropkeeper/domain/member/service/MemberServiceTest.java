@@ -36,8 +36,8 @@ class MemberServiceTest {
     private MemberService memberService;
 
     @Test
-    @DisplayName("회원 조회 성공")
-    void findById_success() {
+    @DisplayName("회원 정보 조회 성공")
+    void getMemberInfo_Success() {
 
         // given
         Long memberId = 1L;
@@ -53,27 +53,27 @@ class MemberServiceTest {
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
 
         // when
-        Member found = memberService.findById(memberId);
+        MemberResponse response = memberService.getMemberInfo(memberId);
 
         // then
-        assertThat(found).isNotNull();
-        assertThat(found.getMemberId()).isEqualTo(memberId);
-        assertThat(found.getUsername()).isEqualTo("testuser01");
-        assertThat(found.getName()).isEqualTo("test");
+        assertThat(response).isNotNull();
+        assertThat(response.getMemberId()).isEqualTo(memberId);
+        assertThat(response.getUsername()).isEqualTo("testuser01");
+        assertThat(response.getName()).isEqualTo("test");
 
         verify(memberRepository, times(1)).findById(memberId);
     }
 
     @Test
-    @DisplayName("회원 조회 실패 - 존재하지 않는 회원")
-    void findById_NotFound() {
+    @DisplayName("회원 정보 조회 실패 - 존재하지 않는 회원")
+    void getMemberInfo_NotFound() {
 
         // given
         Long memberId = 999L;
         when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
 
         // when, then
-        assertThatThrownBy(() -> memberService.findById(memberId))
+        assertThatThrownBy(() -> memberService.getMemberInfo(memberId))
                 .isInstanceOf(MemberNotFoundException.class)
                 .hasMessageContaining("회원을 찾을 수 없습니다");
 
@@ -221,9 +221,9 @@ class MemberServiceTest {
 
         // given
         Long memberId = 1L;
-        String currentPassword = "oldpass1234";
+        String currentPassword = "OldPass1!";
         String encodedCurrentPassword = "encodedOldPassword";
-        String newPassword = "newPass1234";
+        String newPassword = "NewPass1!";
 
         Member member = Member.builder()
                 .memberId(memberId)
@@ -269,13 +269,13 @@ class MemberServiceTest {
                 .build();
 
         UpdatePasswordRequest request = UpdatePasswordRequest.builder()
-                .currentPassword("wrongPassword")
-                .newPassword("newPassword1234")
-                .newPasswordConfirm("newPassword1234")
+                .currentPassword("Wrong789#")
+                .newPassword("NewPass1!")
+                .newPasswordConfirm("NewPass1!")
                 .build();
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-        when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
+        when(passwordEncoder.matches("Wrong789#", "encodedPassword")).thenReturn(false);
 
         // when, then
         assertThatThrownBy(() -> memberService.changePassword(memberId, request))
@@ -300,13 +300,10 @@ class MemberServiceTest {
                 .build();
 
         UpdatePasswordRequest request = UpdatePasswordRequest.builder()
-                .currentPassword("oldPass1234")
-                .newPassword("newPass1234")
-                .newPasswordConfirm("diffNewPass1234")
+                .currentPassword("OldPass1!")
+                .newPassword("NewPass1!")
+                .newPasswordConfirm("DiffPass1@")
                 .build();
-
-        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-        when(passwordEncoder.matches("oldPass1234", "encodedPassword")).thenReturn(true);
 
         // when, then
         assertThatThrownBy(() -> memberService.changePassword(memberId, request))
@@ -322,7 +319,7 @@ class MemberServiceTest {
 
         // given
         Long memberId = 1L;
-        String currentPassword = "pass1234";
+        String currentPassword = "Pass123!";
         String encodedPassword = "encodedPassword";
 
         Member member = Member.builder()
