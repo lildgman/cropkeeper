@@ -48,7 +48,6 @@ public class AuthService {
      */
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
-        log.info("회원가입 시도: {}", request.getUsername());
 
         if (!request.getPassword().equals(request.getPasswordConfirm())) {
             throw new RegisterPasswordMismatchException(AuthErrorCode.REGISTER_PASSWORD_MISMATCH);
@@ -69,7 +68,6 @@ public class AuthService {
                 .build();
 
         Member savedMember = memberRepository.save(member);
-        log.info("회원가입 성공: userId={}, username={}", savedMember.getMemberId(), savedMember.getUsername());
 
         return RegisterResponse.from(savedMember);
     }
@@ -82,7 +80,6 @@ public class AuthService {
      */
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
-        log.info("로그인 시도: {}", request.getUsername());
 
         // AuthenticationManager로 인증 (내부적으로 CustomUserDetailsService.loadUserByUsername 호출)
         Authentication authentication;
@@ -93,7 +90,6 @@ public class AuthService {
                             request.getPassword()
                     )
             );
-            log.info("로그인 인증 성공: {}", request.getUsername());
         } catch (BadCredentialsException e) {
             log.warn("로그인 실패: 잘못된 자격증명 - username: {}", request.getUsername());
             throw new InvalidCredentialsException();
@@ -105,8 +101,6 @@ public class AuthService {
 
         String accessToken = jwtTokenProvider.generateAccessToken(member.getUsername());
         String refreshToken = jwtTokenProvider.generateRefreshToken(member.getUsername());
-
-        log.info("로그인 성공: memberId={}, username={}", member.getMemberId(), member.getUsername());
 
         return LoginResponse.of(accessToken, refreshToken, member);
     }

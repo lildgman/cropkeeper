@@ -7,7 +7,6 @@ import com.cropkeeper.domain.auth.dto.response.RegisterResponse;
 import com.cropkeeper.domain.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 인증/인가 관련 API 엔드포인트
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -34,13 +32,8 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
-        log.info("회원가입 API 호출: username={}", request.getUsername());
-
         RegisterResponse response = authService.register(request);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)  // 201 Created
-                .body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
@@ -51,10 +44,7 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        log.info("로그인 API 호출: username={}", request.getUsername());
-
         LoginResponse response = authService.login(request);
-
-        return ResponseEntity.ok(response);  // 200 OK
+        return ResponseEntity.ok(response);
     }
 }

@@ -22,7 +22,9 @@ public enum MemberErrorCode implements ErrorCode {
 
     NO_FIELD_TO_UPDATE("M008", "수정할 정보가 없습니다. 수정할 이름 또는 연락처를 입력해주세요."),
 
-    ALREADY_DELETED("M009", "이미 탈퇴한 회원입니다.");
+    ALREADY_DELETED("M009", "이미 탈퇴한 회원입니다."),
+
+    INVALID_ASPECT_CONFIGURATION("M010", "@ValidateMemberAccess를 사용하려면 메서드에 @PathVariable Long memberId와 @AuthenticationPrincipal UserPrincipal 파라미터가 필요합니다.");
 
     private final String code;
     private final String message;

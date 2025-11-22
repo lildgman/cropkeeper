@@ -60,16 +60,12 @@ public class MemberService {
 
         Member member = findById(memberId);
 
-        // null이 아닌 필드만 업데이트
         if (request.getName() != null && !request.getName().isEmpty()) {
             member.updateName(request.getName());
         }
         if (request.getContact() != null && !request.getContact().isEmpty()) {
             member.updateContact(request.getContact());
         }
-
-        log.info("회원 정보 수정 완료: memberId = {}, name = {}, contact = {}",
-                memberId, request.getName(), request.getContact());
 
         return MemberResponse.from(member);
     }
@@ -85,9 +81,6 @@ public class MemberService {
     @Transactional
     public void changePassword(Long memberId, UpdatePasswordRequest request) {
 
-        log.info("비밀번호 변경 시도: memberId = {}", memberId);
-
-        // 1. 새 비밀번호 확인 일치 검증 (비용 낮음 - 먼저 수행)
         if (!request.getNewPassword().equals(request.getNewPasswordConfirm())) {
             log.warn("비밀번호 변경 실패: 새 비밀번호 불일치 - memberId = {}", memberId);
             throw new PasswordMismatchException(MemberErrorCode.NEW_PASSWORD_MISMATCH);
@@ -95,13 +88,11 @@ public class MemberService {
 
         Member member = findById(memberId);
 
-        // 2. 현재 비밀번호 검증 (암호화 비교 - 비용 높음)
         if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
             log.warn("비밀번호 변경 실패: 현재 비밀번호 불일치 - memberId = {}", memberId);
             throw new PasswordMismatchException(MemberErrorCode.CURRENT_PASSWORD_MISMATCH);
         }
 
-        // 3. 새 비밀번호와 현재 비밀번호 동일 검증 (암호화 비교)
         if (passwordEncoder.matches(request.getNewPassword(), member.getPassword())) {
             log.warn("비밀번호 변경 실패: 새 비밀번호가 현재 비밀번호와 동일 - memberId = {}", memberId);
             throw new InvalidMemberRequestException(MemberErrorCode.SAME_AS_CURRENT_PASSWORD);
@@ -109,9 +100,6 @@ public class MemberService {
 
         String encodedPassword = passwordEncoder.encode(request.getNewPassword());
         member.changePassword(encodedPassword);
-
-        log.info("비밀번호 변경 완료: memberId = {}", memberId);
-
     }
 
     /**
@@ -123,8 +111,6 @@ public class MemberService {
     @Transactional
     public void deleteMember(Long memberId) {
 
-        log.info("회원 탈퇴 시도: memberId = {}", memberId);
-
         Member member = findById(memberId);
 
         if (member.isDeleted()) {
@@ -133,9 +119,6 @@ public class MemberService {
         }
 
         member.delete();
-
-        log.info("회원 탈퇴 완료: memberId = {}, deletedAt = {}",
-                memberId, member.getDeletedAt());
     }
 
 

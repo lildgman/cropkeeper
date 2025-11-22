@@ -69,6 +69,7 @@ public class GlobalExceptionHandler {
                 case "M001": return HttpStatus.NOT_FOUND;
                 case "M002": return HttpStatus.CONFLICT;
                 case "M007": return HttpStatus.FORBIDDEN;
+                case "M010": return HttpStatus.INTERNAL_SERVER_ERROR;
                 default: return HttpStatus.BAD_REQUEST;
             }
         }

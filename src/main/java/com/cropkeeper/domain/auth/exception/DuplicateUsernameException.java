@@ -2,9 +2,7 @@ package com.cropkeeper.domain.auth.exception;
 
 import com.cropkeeper.domain.member.exception.MemberErrorCode;
 import com.cropkeeper.global.exception.BaseException;
-import lombok.Getter;
 
-@Getter
 public class DuplicateUsernameException extends BaseException {
 
     public DuplicateUsernameException() {

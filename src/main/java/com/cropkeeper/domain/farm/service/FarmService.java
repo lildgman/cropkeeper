@@ -37,8 +37,6 @@ public class FarmService {
     @Transactional
     public FarmResponse createFarm(Long memberId, CreateFarmRequest request) {
 
-        log.info("농장 생성 시도: memberId = {}, farmName = {}", memberId, request.getFarmName());
-
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
@@ -51,8 +49,6 @@ public class FarmService {
 
         Farm savedFarm = farmRepository.save(farm);
 
-        log.info("농장 생성 완료: farmId = {}, farmName = {}", savedFarm.getFarmId(), savedFarm.getFarmName());
-
         return FarmResponse.from(farm);
     }
 
@@ -63,8 +59,6 @@ public class FarmService {
      */
     public List<FarmResponse> findAllByMemberId(Long memberId) {
 
-        log.info("회원의 농장 목록 조회: memberId = {}", memberId);
-
         List<Farm> farms = farmRepository.findByMemberId(memberId);
 
         return farms.stream()
@@ -73,8 +67,6 @@ public class FarmService {
     }
 
     public FarmResponse findById(Long farmId) {
-
-        log.info("농장 조회: farmId = {}", farmId);
 
         Farm farm = farmRepository.findById(farmId)
                 .orElseThrow(() -> new FarmNotFoundException(farmId));
@@ -93,8 +85,6 @@ public class FarmService {
     @Transactional
     public FarmResponse updateFarm(Long farmId, UpdateFarmRequest request) {
 
-        log.info("농장 정보 수정 시도: farmId = {}", farmId);
-
         if (!request.hasAtLeastOneField()) {
             throw new InvalidFarmRequestException(FarmErrorCode.NO_FIELD_TO_UPDATE);
         }
@@ -104,24 +94,16 @@ public class FarmService {
 
         farm.updateInfo(request.getFarmName(), request.getAddress(), request.getFarmSize());
 
-        log.info("농장 정보 수정 완료: farmId = {}, farmName = {}, address = {}, farmSize = {}",
-                farmId, request.getFarmName(), request.getAddress(), request.getFarmSize());
-
         return FarmResponse.from(farm);
     }
 
     @Transactional
     public void deleteFarm(Long farmId) {
 
-        log.info("농장 삭제 시도: farmId = {}", farmId);
-
         Farm farm = farmRepository.findById(farmId)
                 .orElseThrow(() -> new FarmNotFoundException(farmId));
 
         farmRepository.delete(farm);
-
-        log.info("농장 삭제 완료: farmId = {}", farmId);
-
     }
 
 
