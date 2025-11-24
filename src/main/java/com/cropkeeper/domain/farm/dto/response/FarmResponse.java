@@ -16,7 +16,9 @@ public class FarmResponse {
 
     private Long farmId;
     private String farmName;
-    private String address;
+    private String zipCode;
+    private String street;
+    private String detail;
     private Long farmSize;
     private Long memberId;
     private LocalDateTime createdAt;
@@ -27,6 +29,9 @@ public class FarmResponse {
         return FarmResponse.builder()
                 .farmId(farm.getFarmId())
                 .farmName(farm.getFarmName())
+                .zipCode(farm.getAddress() != null ? farm.getAddress().getZipCode() : null)
+                .street(farm.getAddress() != null ? farm.getAddress().getStreet() : null)
+                .detail(farm.getAddress() != null ? farm.getAddress().getDetail() : null)
                 .farmSize(farm.getFarmSize())
                 .memberId(farm.getMember().getMemberId())
                 .createdAt(farm.getCreatedAt())

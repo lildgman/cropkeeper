@@ -73,7 +73,7 @@ public class Member extends BaseTimeEntity {
     }
 
     // 비밀번호 변경
-    public void changePassword(String encodedPasssword) {
-        this.password = encodedPasssword;
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
     }
 }
