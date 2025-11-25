@@ -1,12 +1,15 @@
 package com.cropkeeper.domain.farm.entity;
 
 import com.cropkeeper.domain.farm.vo.Address;
+import com.cropkeeper.domain.farminglog.entity.FarmingLog;
 import com.cropkeeper.domain.member.entity.Member;
 import com.cropkeeper.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "farm")
@@ -41,6 +44,10 @@ public class Farm extends BaseTimeEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @OneToMany(mappedBy = "farm", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<FarmingLog> farmingLogs = new ArrayList<>();
+
     // 편의 메서드
     public void updateFarmName(String farmName) {
         this.farmName = farmName;
@@ -63,5 +70,11 @@ public class Farm extends BaseTimeEntity {
     // 삭제 여부
     public boolean isDeleted() {
         return this.deleted;
+    }
+
+    //==연관관계 편의 메서드==//
+
+    public void changeMember(Member member) {
+        this.member = member;
     }
 }

@@ -56,7 +56,7 @@ public class FarmService {
 
         Farm savedFarm = farmRepository.save(farm);
 
-        return FarmResponse.from(farm);
+        return FarmResponse.from(savedFarm);
     }
 
     /**

@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -46,5 +47,7 @@ public class FarmingLog extends BaseTimeEntity {
     private String memo;
 
     @OneToMany(mappedBy = "farmingLog", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FarmingLogImage> images;
+    @Builder.Default
+    private List<FarmingLogImage> images = new ArrayList<>();
+
 }
