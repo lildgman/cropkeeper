@@ -4,19 +4,15 @@ import com.cropkeeper.domain.member.annotation.ValidateMemberAccess;
 import com.cropkeeper.domain.member.exception.ForbiddenMemberAccessException;
 import com.cropkeeper.domain.member.exception.InvalidAspectConfigurationException;
 import com.cropkeeper.domain.member.exception.MemberErrorCode;
+import com.cropkeeper.global.aspect.AspectParameterExtractor;
 import com.cropkeeper.global.security.UserPrincipal;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 
 /**
  * 회원 접근 권한 검증 AOP
@@ -44,32 +40,12 @@ public class MemberAccessAspect {
      */
     @Before("@annotation(validateMemberAccess)")
     public void validateMemberAccess(JoinPoint joinPoint, ValidateMemberAccess validateMemberAccess) {
-        // 메서드 시그니처 정보 가져오기
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
-        Parameter[] parameters = method.getParameters();
-        Object[] args = joinPoint.getArgs();
+        // 메서드 정보 가져오기
+        Method method = AspectParameterExtractor.getMethod(joinPoint);
 
-        Long requestedMemberId = null;
-        UserPrincipal userPrincipal = null;
-
-        // 메서드 파라미터를 순회하면서 필요한 값 추출
-        for (int i = 0; i < parameters.length; i++) {
-            Parameter parameter = parameters[i];
-
-            // @PathVariable Long memberId 찾기
-            if (parameter.isAnnotationPresent(PathVariable.class) &&
-                    parameter.getType().equals(Long.class) &&
-                    parameter.getName().equals("memberId")) {
-                requestedMemberId = (Long) args[i];
-            }
-
-            // @AuthenticationPrincipal UserPrincipal 찾기
-            if (parameter.isAnnotationPresent(AuthenticationPrincipal.class) &&
-                    parameter.getType().equals(UserPrincipal.class)) {
-                userPrincipal = (UserPrincipal) args[i];
-            }
-        }
+        // 파라미터 추출 (공통 유틸리티 사용)
+        Long requestedMemberId = AspectParameterExtractor.extractPathVariableAsLong(joinPoint, "memberId");
+        UserPrincipal userPrincipal = AspectParameterExtractor.extractUserPrincipal(joinPoint);
 
         // 필수 파라미터 검증
         if (requestedMemberId == null || userPrincipal == null) {
@@ -82,10 +58,8 @@ public class MemberAccessAspect {
             );
         }
 
-        // 작업명 결정 (어노테이션에 지정되어 있으면 사용, 없으면 메서드명 사용)
-        String action = validateMemberAccess.action().isEmpty()
-                ? method.getName()
-                : validateMemberAccess.action();
+        // 작업명 결정 (공통 유틸리티 사용)
+        String action = AspectParameterExtractor.getActionName(joinPoint, validateMemberAccess.action());
 
         // 권한 검증
         if (!requestedMemberId.equals(userPrincipal.getId())) {
