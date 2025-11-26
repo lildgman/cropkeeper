@@ -10,6 +10,6 @@ public class DuplicateUsernameException extends BaseException {
     }
 
     public DuplicateUsernameException(String username) {
-        super(MemberErrorCode.DUPLICATE_USERNAME, MemberErrorCode.DUPLICATE_USERNAME.getMessage() + ": " + username);
+        super(MemberErrorCode.DUPLICATE_USERNAME, AuthErrorCode.DUPLICATE_USERNAME.getMessage() + ": " + username);
     }
 }

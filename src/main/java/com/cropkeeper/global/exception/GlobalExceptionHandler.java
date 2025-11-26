@@ -33,12 +33,19 @@ public class GlobalExceptionHandler {
             BaseException ex,
             HttpServletRequest request) {
 
-        log.error("비즈니스 예외 발생: {} - {} ({})",
-                request.getRequestURI(),
-                ex.getMessage(),
-                ex.getErrorCode().getCode());
+        HttpStatus status = ex.getErrorCode().getHttpStatus();
 
-        HttpStatus status = determineHttpStatus(ex.getErrorCode());
+        if (status.is4xxClientError()) {
+            log.warn("비즈니스 예외 발생: {} - {} ({})",
+                    request.getRequestURI(),
+                    ex.getMessage(),
+                    ex.getErrorCode().getCode());
+        } else {
+            log.error("시스템 예외 발생: {} - {} ({})",
+                    request.getRequestURI(),
+                    ex.getMessage(),
+                    ex.getErrorCode().getCode());
+        }
 
         ErrorResponse response = ErrorResponse.of(
                 status.value(),
@@ -48,33 +55,7 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(status).body(response);
-    }
 
-    private HttpStatus determineHttpStatus(ErrorCode errorCode) {
-
-        String code = errorCode.getCode();
-
-        if (code.startsWith("A")) {
-            switch (code) {
-                case "A001": return HttpStatus.CONFLICT;
-                case "A002": return HttpStatus.BAD_REQUEST;
-                case "A003": return HttpStatus.FORBIDDEN;
-                case "A004": return HttpStatus.UNAUTHORIZED;
-                default: return HttpStatus.BAD_REQUEST;
-            }
-        }
-
-        if (code.startsWith("M")) {
-            switch (code) {
-                case "M001": return HttpStatus.NOT_FOUND;
-                case "M002": return HttpStatus.CONFLICT;
-                case "M007": return HttpStatus.FORBIDDEN;
-                case "M010": return HttpStatus.INTERNAL_SERVER_ERROR;
-                default: return HttpStatus.BAD_REQUEST;
-            }
-        }
-
-        return HttpStatus.BAD_REQUEST;
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -82,7 +63,7 @@ public class GlobalExceptionHandler {
             BadCredentialsException ex,
             HttpServletRequest request) {
 
-        log.error("인증 실패: {} - {}", request.getRequestURI(), ex.getMessage());
+        log.warn("인증 실패: {} - {}", request.getRequestURI(), ex.getMessage());
 
         ErrorResponse response = ErrorResponse.of(
                 HttpStatus.UNAUTHORIZED.value(),
@@ -100,7 +81,7 @@ public class GlobalExceptionHandler {
             UsernameNotFoundException ex,
             HttpServletRequest request) {
 
-        log.error("사용자 조회 실패 - {} - {}", request.getRequestURI(), ex.getMessage());
+        log.warn("사용자 조회 실패 - {} - {}", request.getRequestURI(), ex.getMessage());
 
         ErrorResponse response = ErrorResponse.of(
                 HttpStatus.UNAUTHORIZED.value(),
@@ -116,7 +97,7 @@ public class GlobalExceptionHandler {
             IllegalArgumentException ex,
             HttpServletRequest request) {
 
-        log.error("잘못된 요청: {} - {}", request.getRequestURI(), ex.getMessage());
+        log.warn("잘못된 요청: {} - {}", request.getRequestURI(), ex.getMessage());
 
         ErrorResponse response = ErrorResponse.of(
                 HttpStatus.BAD_REQUEST.value(),
@@ -134,7 +115,7 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpServletRequest request) {
 
-        log.error("유효성 검증 실패: {} - {}", request.getRequestURI(), ex.getMessage());
+        log.warn("유효성 검증 실패: {} - {}", request.getRequestURI(), ex.getMessage());
 
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(

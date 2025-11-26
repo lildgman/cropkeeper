@@ -93,23 +93,56 @@ Tests use H2 in-memory database with a test-specific configuration in `src/test/
 ## Architecture
 
 ### Package Structure
+The project follows a domain-driven package structure:
 ```
 com.cropkeeper/
-├── CropkeeperApplication.java  # Main Spring Boot application entry point
-└── (additional packages to be created as needed)
+├── CropkeeperApplication.java
+├── domain/
+│   ├── {domain}/              # e.g., farm, member, cultivation
+│   │   ├── entity/            # JPA entities
+│   │   ├── vo/                # Value Objects (embedded types)
+│   │   ├── repository/        # Spring Data JPA repositories
+│   │   ├── service/           # Business logic
+│   │   ├── controller/        # REST/MVC controllers
+│   │   ├── dto/               # Request/Response DTOs
+│   │   ├── exception/         # Domain-specific exceptions
+│   │   ├── annotation/        # Custom annotations (e.g., @ValidateFarmAccess)
+│   │   └── aspect/            # AOP aspects for cross-cutting concerns
+└── global/
+    ├── common/                # Base entities (BaseTimeEntity)
+    ├── exception/             # Global exception handling
+    ├── security/              # JWT, UserPrincipal
+    ├── aspect/                # Common AOP utilities
+    └── logging/               # Global logging aspects
 ```
 
-### Standard Spring Boot Layered Architecture
-Follow these conventions when adding code:
-- `controller/` - REST controllers and MVC controllers (e.g., `UserController`)
-- `service/` - Business logic layer (e.g., `UserService`)
-- `repository/` - Spring Data JPA repositories (e.g., `UserRepository`)
-- `model/` or `entity/` - JPA entities (e.g., `User`, `Crop`)
-- `dto/` - Data Transfer Objects for API requests/responses
-- `config/` - Spring configuration classes (Security, JPA, etc.)
-- `security/` - Security-related classes (JWT filters, authentication providers)
-- `exception/` - Custom exceptions and exception handlers
-- `util/` - Utility classes
+### Layered Architecture Pattern
+Each domain follows this flow: **Controller → Service → Repository → Entity**
+
+**Controller Layer:**
+- Uses `@RestController` with `@RequestMapping("/api/{resource}")`
+- Injects `@AuthenticationPrincipal UserPrincipal` for current user
+- Returns `ResponseEntity` with appropriate status codes (201 for creation, 200 for success, 204 for delete)
+- Uses `@Valid` for request validation
+- Applies custom AOP annotations for access control (e.g., `@ValidateFarmAccess`)
+
+**Service Layer:**
+- Annotated with `@Service`, `@RequiredArgsConstructor`, `@Slf4j`
+- Uses `@Transactional(readOnly = true)` at class level, `@Transactional` on write operations
+- Uses `getReferenceById()` for FK relationships to avoid unnecessary DB queries (proxy pattern)
+- Implements private helper methods like `findById()` for entity retrieval with exception handling
+
+**Repository Layer:**
+- Extends `JpaRepository<Entity, ID>`
+- Custom query methods follow Spring Data JPA naming conventions
+- Example: `findByMemberId()`, `findByFarmAndMetadata_LogDateBetween()`
+
+**Entity Layer:**
+- All entities extend `BaseTimeEntity` for audit fields (`createdAt`, `updatedAt`)
+- Uses Lombok: `@Getter`, `@NoArgsConstructor(access = AccessLevel.PROTECTED)`, `@AllArgsConstructor`, `@Builder`
+- Implements soft delete pattern with `deleted` (Boolean) and `deletedAt` (LocalDateTime) fields
+- Includes convenience methods for updates (e.g., `updateFarmName()`, `delete()`)
+- Uses `@Embedded` for Value Objects (e.g., `FarmingMetadata`, `Address`)
 
 ### Key Technologies & Patterns
 
@@ -117,11 +150,41 @@ Follow these conventions when adding code:
 - MySQL for production (configured via environment variables)
 - H2 for testing (in-memory)
 - JPA/Hibernate with entity relationships
+- Soft delete pattern: entities include `deleted` and `deletedAt` fields instead of hard deletes
 
 **Security**:
 - Spring Security with JWT authentication
 - Tokens expire after 1 hour by default (configurable)
+- `UserPrincipal` contains authenticated user info (ID, username, role)
 - Thymeleaf integration with Spring Security
+
+**AOP Access Control Pattern**:
+The project uses custom annotations with AOP for resource access validation:
+1. **Custom Annotation**: Define annotation in `domain/{domain}/annotation/` (e.g., `@ValidateFarmAccess`)
+2. **Aspect Implementation**: Create aspect in `domain/{domain}/aspect/` (e.g., `FarmAccessAspect`)
+3. **Usage**: Apply annotation to controller methods with `@PathVariable Long {resource}Id` and `@AuthenticationPrincipal UserPrincipal`
+4. **Validation Flow**:
+   - Extract `{resource}Id` from `@PathVariable`
+   - Extract `UserPrincipal` from method parameters
+   - Retrieve resource entity from database
+   - Verify authenticated user owns the resource
+   - Throw `Forbidden{Resource}AccessException` if unauthorized
+
+**Exception Handling Pattern**:
+1. **ErrorCode Interface**: All error codes implement `global.exception.ErrorCode` (code, message, httpStatus)
+2. **Domain ErrorCode Enum**: Each domain has an enum like `FarmErrorCode` implementing `ErrorCode`
+3. **Custom Exceptions**: Extend `global.exception.BaseException` with specific error codes
+4. **Global Handler**: `GlobalExceptionHandler` catches all exceptions and returns standardized `ErrorResponse`
+
+**DTO Pattern**:
+- **Request DTOs**: Include Bean Validation annotations (`@NotBlank`, `@NotNull`, `@Size`, `@Min`)
+- **Response DTOs**: Use static factory method `from(Entity entity)` for entity-to-DTO conversion
+- **Builder Pattern**: All DTOs use Lombok `@Builder` for construction
+
+**Value Objects (Embedded Types)**:
+- Common data groups are extracted into `@Embeddable` classes in `domain/{domain}/vo/`
+- Example: `FarmingMetadata` contains `logDate`, `weather`, `temperature`, `humidity`, `memo`
+- Used across multiple log entities (CultivationLog, FertilizingLog, etc.)
 
 **Views**:
 - Thymeleaf templates in `src/main/resources/templates/`
@@ -134,6 +197,43 @@ Follow these conventions when adding code:
 
 ## Development Guidelines
 
+### Adding a New Domain Feature
+When implementing CRUD for a new domain (e.g., CultivationLog), follow this order:
+
+1. **Entity & Repository** (usually already exists):
+   - Extend `BaseTimeEntity`
+   - Add soft delete fields if needed (`deleted`, `deletedAt`)
+   - Create repository extending `JpaRepository<Entity, ID>`
+
+2. **Exceptions**:
+   - Create `{Domain}ErrorCode` enum implementing `ErrorCode`
+   - Create domain-specific exceptions extending `BaseException`
+
+3. **DTOs**:
+   - Create request DTOs with Bean Validation annotations
+   - Create response DTOs with `from(Entity entity)` factory method
+
+4. **Service**:
+   - Use `@Transactional(readOnly = true)` at class level
+   - Use `@Transactional` on write operations
+   - Use `getReferenceById()` for FK relationships (proxy pattern)
+   - Create private `findById()` helper for entity retrieval
+
+5. **Controller**:
+   - Use appropriate HTTP methods (POST for create, PUT/PATCH for update, DELETE for delete)
+   - Apply access control annotations (e.g., `@ValidateFarmAccess`)
+   - Return proper status codes (201 for create, 200 for success, 204 for delete)
+
+6. **AOP Access Control** (if ownership validation needed):
+   - Create annotation in `domain/{domain}/annotation/`
+   - Create aspect in `domain/{domain}/aspect/` using `AspectParameterExtractor` utility
+   - Apply annotation to controller methods
+
+7. **Tests**:
+   - Service tests: `@SpringBootTest` with `@Transactional`
+   - Repository tests: `@DataJpaTest` with H2
+   - Controller tests: `@WebMvcTest` with mocked services
+
 ### Database Schema Management
 - Default DDL mode is `update` (Hibernate auto-updates schema)
 - Use `create-drop` for fresh development
@@ -143,17 +243,43 @@ Follow these conventions when adding code:
 ### Security Best Practices
 - Never commit `application-secret.yml` (add to .gitignore immediately)
 - Use strong, randomly-generated JWT secret keys (minimum 256 bits)
-- Validate all member inputs using Bean Validation (`@Valid`, `@NotNull`, etc.)
+- Validate all user inputs using Bean Validation (`@Valid`, `@NotNull`, etc.)
 - Use parameterized queries (JPA does this by default)
 
 ### Lombok Usage
-- Use `@Data`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor` on entities
-- Use `@Slf4j` for logging
+- Entities: `@Getter`, `@NoArgsConstructor(access = AccessLevel.PROTECTED)`, `@AllArgsConstructor`, `@Builder`
+- Services/Controllers: `@RequiredArgsConstructor`, `@Slf4j`
+- DTOs: `@Getter`, `@Builder`
 - Annotation processor is configured in build.gradle
 
 ### Testing
-- Write unit tests for services using JUnit 5
-- Use `@WebMvcTest` for controller tests
-- Use `@DataJpaTest` for repository tests
-- Use `@SpringBootTest` for integration tests
-- Spring Security test support is available via `spring-security-test`
+
+**Service Layer Tests (Unit Testing):**
+- Use `@ExtendWith(MockitoExtension.class)` for fast, isolated unit tests
+- Mock dependencies with `@Mock` (repositories, other services)
+- Inject mocks into service with `@InjectMocks`
+- Use Mockito's `when()`, `verify()`, `times()`, `never()` for behavior verification
+- Focus on testing business logic in isolation
+- Example: `MemberServiceTest`, `AuthServiceTest`
+
+**Repository Layer Tests (Integration Testing):**
+- Use `@DataJpaTest` for repository-focused integration tests
+- Automatically configures H2 in-memory database
+- Use `TestEntityManager` for setup and assertions
+- Tests run in transactions and rollback automatically
+- Tests actual JPA queries, relationships, and database constraints
+- Example: `MemberRepositoryTest`, `FarmRepositoryTest`
+
+**Controller Layer Tests (Integration Testing):**
+- Use `@SpringBootTest` + `@AutoConfigureMockMvc` for full integration tests
+- Use `@Transactional` to rollback after each test
+- Inject `MockMvc` for HTTP request simulation
+- Test entire request-response cycle including security, validation, and exception handling
+- Use `@BeforeEach` to set up test data and authentication tokens
+- Example: `AuthControllerTest`, `MemberControllerTest`
+
+**Common Testing Practices:**
+- Use AssertJ for assertions (`assertThat()`)
+- Use `@DisplayName` for descriptive test names in Korean
+- Use `MockMvc` methods: `perform()`, `andExpect()`, `andDo(print())`
+- Test both success and failure scenarios comprehensively
