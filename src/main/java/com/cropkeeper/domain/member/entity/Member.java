@@ -51,13 +51,6 @@ public class Member extends BaseTimeEntity {
 
     // 편의 메서드
 
-    /**
-     * 회원 탈퇴 처리 (소프트 삭제)
-     *
-     * 회원을 삭제하면 소유한 모든 농장도 함께 삭제됩니다.
-     * Cascade 설정은 JPA remove()에만 적용되므로,
-     * 소프트 삭제 시에는 명시적으로 farms도 삭제해야 합니다.
-     */
     public void delete() {
         this.deleted = true;
         this.deletedAt = LocalDateTime.now();

@@ -18,9 +18,11 @@ public class FarmingLogImage {
     @Column(name = "image_id")
     private Long imageId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "log_id", nullable = false)
-    private FarmingLog farmingLog;
+    @Column(name = "log_type", nullable = false, length = 50)
+    private String logType;  // "CULTIVATION", "FERTILIZING", "PEST_CONTROL", "IRRIGATION"
+
+    @Column(name = "log_id", nullable = false)
+    private Long logId;
 
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;

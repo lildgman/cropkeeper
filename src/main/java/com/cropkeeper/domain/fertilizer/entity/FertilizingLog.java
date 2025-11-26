@@ -1,26 +1,35 @@
 package com.cropkeeper.domain.fertilizer.entity;
 
-import com.cropkeeper.domain.farminglog.entity.FarmingLog;
+import com.cropkeeper.domain.farm.entity.Farm;
+import com.cropkeeper.domain.farminglog.vo.FarmingMetadata;
+import com.cropkeeper.domain.member.entity.Member;
 import com.cropkeeper.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "fertilizing")
+@Table(name = "fertilizing_log")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Fertilizing extends BaseTimeEntity {
+public class FertilizingLog extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "fertilize_id")
-    private Long fertilizeId;
+    @Column(name = "fertilizing_log_id")
+    private Long fertilizingLogId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "log_id", nullable = false)
-    private FarmingLog farmingLog;
+    @JoinColumn(name = "farm_id", nullable = false)
+    private Farm farm;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Member member;
+
+    @Embedded
+    private FarmingMetadata metadata;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fertilizer_id", nullable = false)

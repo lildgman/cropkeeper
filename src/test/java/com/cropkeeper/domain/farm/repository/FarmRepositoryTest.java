@@ -55,7 +55,6 @@ class FarmRepositoryTest {
         member.addFarm(farm);
 
         return entityManager.persist(farm);
-
     }
 
     @Test
