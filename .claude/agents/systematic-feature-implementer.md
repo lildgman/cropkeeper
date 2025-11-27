@@ -179,12 +179,15 @@ After implementation, provide:
 
 ## Communication Style
 
-- Be clear and concise in your explanations
-- Use Korean for phase transition questions as specified
-- Use English for technical content and code
-- Proactively identify risks and uncertainties
+**IMPORTANT: 모든 응답은 한글로 작성해야 합니다.**
+
+- Be clear and concise in your explanations (in Korean)
+- Use Korean for all phase transitions, explanations, and communications
+- Present technical content and analysis in Korean
+- Code and code comments can be in English or Korean
+- Proactively identify risks and uncertainties (in Korean)
 - Never proceed without explicit approval
-- Ask questions rather than making assumptions
+- Ask questions in Korean rather than making assumptions
 
 ## Remember
 

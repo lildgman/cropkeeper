@@ -14,13 +14,13 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UpdateFarmRequest {
 
-    @Size(max = 100, message = "농장 이름은 100자 이하여야 합니다.")
+    @Size(max = 20, message = "농장 이름은 20자 이하여야 합니다.")
     private String farmName;
 
     @Size(max = 10, message = "우편번호는 10자 이하여야 합니다.")
     private String zipCode;
 
-    @Size(max = 200, message = "주소는 200자 이하여야 합니다.")
+    @Size(max = 100, message = "주소는 100자 이하여야 합니다.")
     private String street;
 
     @Size(max = 100, message = "상세주소는 100자 이하여야 합니다.")

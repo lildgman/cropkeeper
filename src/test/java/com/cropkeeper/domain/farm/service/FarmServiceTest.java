@@ -68,25 +68,12 @@ class FarmServiceTest {
     }
 
     /**
-     * 커스텀 테스트용 Member 객체 생성
-     */
-    private Member createTestMember(Long memberId, String username, String name) {
-        return Member.builder()
-                .memberId(memberId)
-                .username(username)
-                .password("encodedPassword")
-                .name(name)
-                .role(MemberRole.USER)
-                .build();
-    }
-
-    /**
      * 기본 주소를 가진 테스트용 Farm 객체 생성
      */
-    private Farm createDefaultTestFarm(Long farmId, String farmName, Member member) {
+    private Farm createDefaultTestFarm(Long farmId, Member member) {
         return Farm.builder()
                 .farmId(farmId)
-                .farmName(farmName)
+                .farmName(FarmServiceTest.TEST_FARM_NAME)
                 .address(createDefaultAddress())
                 .farmSize(TEST_FARM_SIZE)
                 .member(member)
@@ -133,7 +120,7 @@ class FarmServiceTest {
                 .build();
 
         Member memberRef = createDefaultTestMember();
-        Farm savedFarm = createDefaultTestFarm(1L, TEST_FARM_NAME, memberRef);
+        Farm savedFarm = createDefaultTestFarm(1L, memberRef);
 
         when(memberRepository.existsById(TEST_MEMBER_ID)).thenReturn(true);
         when(memberRepository.getReferenceById(TEST_MEMBER_ID)).thenReturn(memberRef);
@@ -231,7 +218,7 @@ class FarmServiceTest {
         // given
         Long farmId = 1L;
         Member member = createDefaultTestMember();
-        Farm farm = createDefaultTestFarm(farmId, TEST_FARM_NAME, member);
+        Farm farm = createDefaultTestFarm(farmId, member);
 
         when(farmRepository.findById(farmId)).thenReturn(Optional.of(farm));
 
@@ -273,7 +260,7 @@ class FarmServiceTest {
         // given
         Long farmId = 1L;
         Member member = createDefaultTestMember();
-        Farm farm = createDefaultTestFarm(farmId, TEST_FARM_NAME, member);
+        Farm farm = createDefaultTestFarm(farmId, member);
 
         UpdateFarmRequest request = UpdateFarmRequest.builder()
                 .farmName("새농장")
@@ -306,7 +293,7 @@ class FarmServiceTest {
         // given
         Long farmId = 1L;
         Member member = createDefaultTestMember();
-        Farm farm = createDefaultTestFarm(farmId, TEST_FARM_NAME, member);
+        Farm farm = createDefaultTestFarm(farmId, member);
 
         UpdateFarmRequest request = UpdateFarmRequest.builder()
                 .farmName("새농장")
@@ -333,7 +320,7 @@ class FarmServiceTest {
         // given
         Long farmId = 1L;
         Member member = createDefaultTestMember();
-        Farm farm = createDefaultTestFarm(farmId, TEST_FARM_NAME, member);
+        Farm farm = createDefaultTestFarm(farmId, member);
 
         UpdateFarmRequest request = UpdateFarmRequest.builder()
                 .zipCode("54321")
