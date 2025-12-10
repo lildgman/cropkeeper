@@ -11,7 +11,22 @@ import java.util.List;
 @Repository
 public interface CultivationLogRepository extends JpaRepository<CultivationLog, Long> {
 
-    List<CultivationLog> findByFarm(Farm farm);
+    /**
+     * 특정 농장의 모든 재배기록 조회
+     */
+    List<CultivationLog> findByFarm_FarmId(Long farmId);
 
-    List<CultivationLog> findByFarmAndMetadata_LogDateBetween(Farm farm, LocalDateTime startDate, LocalDateTime endDate);
+    /**
+     * 특정 농장의 기간별 재배기록 조회
+     */
+    List<CultivationLog> findByFarm_FarmIdAndMetadata_LogDateBetween(
+            Long farmId,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
+    /**
+     * 특정 농장의 품종별 재배기록 조회
+     */
+    List<CultivationLog> findByFarm_FarmIdAndVariety_VarietyId(Long farmId, Long varietyId);
 }
