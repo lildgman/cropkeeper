@@ -1,36 +1,24 @@
 package com.cropkeeper.domain.irrigation.entity;
 
-import com.cropkeeper.domain.farm.entity.Farm;
-import com.cropkeeper.domain.farminglog.vo.FarmingMetadata;
-import com.cropkeeper.domain.member.entity.Member;
-import com.cropkeeper.global.common.BaseTimeEntity;
+import com.cropkeeper.domain.farminglog.entity.FarmingLog;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "irrigation_log")
+@DiscriminatorValue("IRRIGATION")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Builder
-public class IrrigationLog extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "irrigation_log_id")
-    private Long irrigationLogId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "farm_id", nullable = false)
-    private Farm farm;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private Member member;
-
-    @Embedded
-    private FarmingMetadata metadata;
+@SuperBuilder
+public class IrrigationLog extends FarmingLog {
 
     @Column(name = "water_amount_liter", nullable = false)
     private Long waterAmountLiter;
+
+    // 관수기록 전용 편의 메서드
+    public void updateWaterAmountLiter(Long waterAmountLiter) {
+        this.waterAmountLiter = waterAmountLiter;
+    }
 }

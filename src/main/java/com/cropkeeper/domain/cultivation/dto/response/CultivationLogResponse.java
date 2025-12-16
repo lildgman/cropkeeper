@@ -37,7 +37,7 @@ public class CultivationLogResponse {
      */
     public static CultivationLogResponse from(CultivationLog log) {
         return CultivationLogResponse.builder()
-                .cultivationLogId(log.getCultivationLogId())
+                .cultivationLogId(log.getFarmingLogId())
                 .farmId(log.getFarm().getFarmId())
                 .memberId(log.getMember().getMemberId())
                 .varietyId(log.getVariety().getVarietyId())

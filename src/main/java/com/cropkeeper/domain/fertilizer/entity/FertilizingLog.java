@@ -1,35 +1,18 @@
 package com.cropkeeper.domain.fertilizer.entity;
 
-import com.cropkeeper.domain.farm.entity.Farm;
-import com.cropkeeper.domain.farminglog.vo.FarmingMetadata;
-import com.cropkeeper.domain.member.entity.Member;
-import com.cropkeeper.global.common.BaseTimeEntity;
+import com.cropkeeper.domain.farminglog.entity.FarmingLog;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "fertilizing_log")
+@DiscriminatorValue("FERTILIZING")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Builder
-public class FertilizingLog extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "fertilizing_log_id")
-    private Long fertilizingLogId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "farm_id", nullable = false)
-    private Farm farm;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private Member member;
-
-    @Embedded
-    private FarmingMetadata metadata;
+@SuperBuilder
+public class FertilizingLog extends FarmingLog {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fertilizer_id", nullable = false)
@@ -37,4 +20,13 @@ public class FertilizingLog extends BaseTimeEntity {
 
     @Column(name = "used_amount_bag", nullable = false)
     private Long usedAmountBag;
+
+    // 시비기록 전용 편의 메서드
+    public void updateFertilizer(Fertilizer fertilizer) {
+        this.fertilizer = fertilizer;
+    }
+
+    public void updateUsedAmountBag(Long usedAmountBag) {
+        this.usedAmountBag = usedAmountBag;
+    }
 }
