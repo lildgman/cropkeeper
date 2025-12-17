@@ -28,4 +28,13 @@ public class CropCategory {
     protected void onCreated() {
         createdAt = LocalDateTime.now();
     }
+
+    /**
+     * 카테고리명 수정
+     *
+     * @param newName 새 카테고리명
+     */
+    public void updateCategoryName(String newName) {
+        this.categoryName = newName;
+    }
 }
