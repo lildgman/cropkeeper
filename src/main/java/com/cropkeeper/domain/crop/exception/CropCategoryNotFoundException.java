@@ -9,11 +9,11 @@ public class CropCategoryNotFoundException extends BaseException {
 
     public CropCategoryNotFoundException(Long categoryId) {
         super(CropErrorCode.CROP_CATEGORY_NOT_FOUND,
-                "카테고리 ID: " + categoryId);
+                "작물 카테고리를 찾을 수 없습니다. 카테고리 ID: " + categoryId);
     }
 
     public CropCategoryNotFoundException(String categoryName) {
         super(CropErrorCode.CROP_CATEGORY_NOT_FOUND,
-                "카테고리 이름: " + categoryName);
+                "작물 카테고리를 찾을 수 없습니다. 카테고리 이름: " + categoryName);
     }
 }
