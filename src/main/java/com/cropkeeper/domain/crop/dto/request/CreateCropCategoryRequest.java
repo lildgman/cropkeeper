@@ -17,6 +17,6 @@ import lombok.NoArgsConstructor;
 public class CreateCropCategoryRequest {
 
     @NotBlank(message = "카테고리명은 필수입니다.")
-    @Size(max = 50, message = "카테고리명은 10자 이하여야 합니다.")
+    @Size(max = 10, message = "카테고리명은 10자 이하여야 합니다.")
     private String categoryName;
 }
