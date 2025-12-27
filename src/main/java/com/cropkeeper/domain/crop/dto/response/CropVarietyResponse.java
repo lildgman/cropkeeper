@@ -38,10 +38,10 @@ public class CropVarietyResponse {
         return CropVarietyResponse.builder()
                 .varietyId(variety.getVarietyId())
                 .varietyName(variety.getVarietyName())
-                .cropId(variety.getCrop().getCropId())
-                .cropName(variety.getCrop().getCropName())
-                .categoryId(variety.getCrop().getCategory().getCategoryId())
-                .categoryName(variety.getCrop().getCategory().getCategoryName())
+                .cropId(variety.getCropType().getTypeId())
+                .cropName(variety.getCropType().getTypeName())
+                .categoryId(variety.getCropType().getCategory().getCategoryId())
+                .categoryName(variety.getCropType().getCategory().getCategoryName())
                 .createdAt(variety.getCreatedAt())
                 .build();
     }

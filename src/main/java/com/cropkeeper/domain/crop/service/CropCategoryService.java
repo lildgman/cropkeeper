@@ -8,7 +8,7 @@ import com.cropkeeper.domain.crop.exception.CropCategoryHasCropsException;
 import com.cropkeeper.domain.crop.exception.CropCategoryNotFoundException;
 import com.cropkeeper.domain.crop.exception.DuplicateCropCategoryNameException;
 import com.cropkeeper.domain.crop.repository.CropCategoryRepository;
-import com.cropkeeper.domain.crop.repository.CropRepository;
+import com.cropkeeper.domain.crop.repository.CropTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class CropCategoryService {
 
     private final CropCategoryRepository categoryRepository;
-    private final CropRepository cropRepository;
+    private final CropTypeRepository cropTypeRepository;
 
     /**
      * 작물 카테고리 생성
@@ -119,13 +119,19 @@ public class CropCategoryService {
 
     }
 
+
+    /**
+     * 작물 카테고리 삭제
+     *
+     * @param categoryId 삭제할 카테고리 id
+     */
     @Transactional
     public void deleteCategory(Long categoryId) {
 
         CropCategory category = findById(categoryId);
         validateNoCrops(categoryId, "삭제");
 
-        categoryRepository.delete(category);
+        category.delete();
         log.info("작물 카테고리 삭제 완료: categoryID = {}, categoryName = {}",
                 categoryId, category.getCategoryName());
 
@@ -148,7 +154,7 @@ public class CropCategoryService {
 
     private void validateNoCrops(Long categoryId, String action) {
 
-        if (cropRepository.existsByCategoryCategoryId(categoryId)) {
+        if (cropTypeRepository.existsByCategoryCategoryId(categoryId)) {
             log.warn("작물이 연결된 카테고리 {} 시도: categoryId = {}", action, categoryId);
             throw new CropCategoryHasCropsException(categoryId, action);
         }

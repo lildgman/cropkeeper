@@ -44,24 +44,24 @@ Once the user approves your analysis, enter **extended thinking mode** and desig
 **A. Happy Path (Normal Operation)**
 - Most common usage scenarios
 - Valid inputs producing expected outputs
-- Example: "When valid crop data is provided, crop is successfully registered"
+- Example: "When valid cropType data is provided, cropType is successfully registered"
 
 **B. Edge Cases (Boundary Conditions)**
 - null values, empty strings, empty collections
 - Minimum/maximum values
 - Zero, negative numbers, special characters
-- Example: "When crop name is null, validation fails", "When cultivation area is 0, registration proceeds with warning"
+- Example: "When cropType name is null, validation fails", "When cultivation area is 0, registration proceeds with warning"
 
 **C. Exception Cases (Error Scenarios)**
 - Business rule violations
 - Database constraint violations
 - Security violations
-- Example: "When duplicate crop name exists, throws DuplicateCropException"
+- Example: "When duplicate cropType name exists, throws DuplicateCropException"
 
 **D. Integration Cases (if applicable)**
 - Multi-component interactions
 - Database transaction verification
-- Example: "When crop is registered, it can be retrieved from database"
+- Example: "When cropType is registered, it can be retrieved from database"
 
 Present your test plan clearly, grouped by category. Then ask: "Please review this test plan. Once you approve, I will proceed to write the test code."
 
@@ -81,13 +81,13 @@ Once approved, write test code following these standards:
 @Test
 void methodName_condition_expectedResult() {
     // Given: Set up test data and mocks
-    Crop crop = Crop.builder()
+    Crop cropType = Crop.builder()
         .name("토마토")
         .cultivationArea(100.0)
         .build();
     
     // When: Execute the method under test
-    Crop result = cropService.register(crop);
+    Crop result = cropService.register(cropType);
     
     // Then: Verify the results
     assertThat(result).isNotNull();

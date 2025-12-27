@@ -11,6 +11,9 @@ import java.util.Optional;
 @Repository
 public interface CropVarietyRepository extends JpaRepository<CropVariety, Long> {
 
-    @Query("SELECT cv FROM CropVariety cv WHERE cv.crop.cropId = :cropId AND cv.varietyName = :varietyName")
-    Optional<CropVariety> findByCrop_CropIdAndVarietyName(@Param("cropId") Long cropId, @Param("varietyName") String varietyName);
+    @Query("SELECT cv FROM CropVariety cv WHERE cv.cropType.typeId = :typeId AND cv.varietyName = :varietyName AND cv.deleted = false")
+    Optional<CropVariety> findByCrop_CropIdAndVarietyName(@Param("typeId") Long typeId, @Param("varietyName") String varietyName);
+
+    @Query("SELECT cv FROM CropVariety cv WHERE cv.varietyId = :varietyId AND cv.deleted = false")
+    Optional<CropVariety> findById(@Param("varietyId") Long varietyId);
 }

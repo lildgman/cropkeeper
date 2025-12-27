@@ -11,6 +11,9 @@ import java.util.Optional;
 @Repository
 public interface CropCategoryRepository extends JpaRepository<CropCategory, Long> {
 
-    @Query("SELECT cc FROM CropCategory cc WHERE cc.categoryName = :categoryName")
+    @Query("SELECT cc FROM CropCategory cc WHERE cc.categoryName = :categoryName AND cc.deleted = false")
     Optional<CropCategory> findByCategoryName(@Param("categoryName") String categoryName);
+
+    @Query("SELECT cc FROM CropCategory cc WHERE cc.categoryId = :categoryId AND cc.deleted = false")
+    Optional<CropCategory> findById(@Param("categoryId") Long categoryId);
 }

@@ -1,6 +1,6 @@
 package com.cropkeeper.domain.crop.repository;
 
-import com.cropkeeper.domain.crop.entity.Crop;
+import com.cropkeeper.domain.crop.entity.CropType;
 import com.cropkeeper.domain.crop.entity.CropCategory;
 import com.cropkeeper.domain.crop.entity.CropVariety;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +26,8 @@ class CropVarietyRepositoryTest {
     private TestEntityManager entityManager;
 
     private CropCategory category;
-    private Crop crop1;
-    private Crop crop2;
+    private CropType cropType1;
+    private CropType cropType2;
 
     @BeforeEach
     void setUp() {
@@ -37,17 +37,17 @@ class CropVarietyRepositoryTest {
                 .build();
         category = entityManager.persist(category);
 
-        crop1 = Crop.builder()
-                .cropName("토마토")
+        cropType1 = CropType.builder()
+                .typeName("토마토")
                 .category(category)
                 .build();
-        crop1 = entityManager.persist(crop1);
+        cropType1 = entityManager.persist(cropType1);
 
-        crop2 = Crop.builder()
-                .cropName("오이")
+        cropType2 = CropType.builder()
+                .typeName("오이")
                 .category(category)
                 .build();
-        crop2 = entityManager.persist(crop2);
+        cropType2 = entityManager.persist(cropType2);
 
         entityManager.flush();
     }
@@ -58,7 +58,7 @@ class CropVarietyRepositoryTest {
         // Given: 새로운 품종 엔티티 생성
         CropVariety variety = CropVariety.builder()
                 .varietyName("방울토마토")
-                .crop(crop1)
+                .cropType(cropType1)
                 .build();
 
         // When: 품종 저장
@@ -69,8 +69,9 @@ class CropVarietyRepositoryTest {
         // Then: 저장된 품종 검증
         assertThat(savedVariety.getVarietyId()).isNotNull();
         assertThat(savedVariety.getVarietyName()).isEqualTo("방울토마토");
-        assertThat(savedVariety.getCrop().getCropId()).isEqualTo(crop1.getCropId());
+        assertThat(savedVariety.getCropType().getTypeId()).isEqualTo(cropType1.getTypeId());
         assertThat(savedVariety.getCreatedAt()).isNotNull();
+        assertThat(savedVariety.getUpdatedAt()).isNotNull();
     }
 
     @Test
@@ -79,7 +80,7 @@ class CropVarietyRepositoryTest {
         // Given: 품종 저장
         CropVariety variety = CropVariety.builder()
                 .varietyName("대추토마토")
-                .crop(crop1)
+                .cropType(cropType1)
                 .build();
         entityManager.persist(variety);
         entityManager.flush();
@@ -87,12 +88,12 @@ class CropVarietyRepositoryTest {
 
         // When: 작물ID와 품종명으로 조회
         Optional<CropVariety> foundVariety = cropVarietyRepository
-                .findByCrop_CropIdAndVarietyName(crop1.getCropId(), "대추토마토");
+                .findByCrop_CropIdAndVarietyName(cropType1.getTypeId(), "대추토마토");
 
         // Then: 조회 결과 검증
         assertThat(foundVariety).isPresent();
         assertThat(foundVariety.get().getVarietyName()).isEqualTo("대추토마토");
-        assertThat(foundVariety.get().getCrop().getCropName()).isEqualTo("토마토");
+        assertThat(foundVariety.get().getCropType().getTypeName()).isEqualTo("토마토");
     }
 
     @Test
@@ -101,7 +102,7 @@ class CropVarietyRepositoryTest {
         // Given: 품종 저장
         CropVariety variety = CropVariety.builder()
                 .varietyName("방울토마토")
-                .crop(crop1)
+                .cropType(cropType1)
                 .build();
         entityManager.persist(variety);
         entityManager.flush();
@@ -120,14 +121,14 @@ class CropVarietyRepositoryTest {
         // Given: 품종 저장
         CropVariety variety = CropVariety.builder()
                 .varietyName("방울토마토")
-                .crop(crop1)
+                .cropType(cropType1)
                 .build();
         entityManager.persist(variety);
         entityManager.flush();
 
         // When: 존재하지 않는 품종명으로 조회
         Optional<CropVariety> foundVariety = cropVarietyRepository
-                .findByCrop_CropIdAndVarietyName(crop1.getCropId(), "존재하지않는품종");
+                .findByCrop_CropIdAndVarietyName(cropType1.getTypeId(), "존재하지않는품종");
 
         // Then: Empty Optional 반환
         assertThat(foundVariety).isEmpty();
@@ -139,7 +140,7 @@ class CropVarietyRepositoryTest {
         // Given: crop1에 "청과" 품종 저장
         CropVariety variety1 = CropVariety.builder()
                 .varietyName("청과")
-                .crop(crop1)
+                .cropType(cropType1)
                 .build();
         cropVarietyRepository.save(variety1);
         entityManager.flush();
@@ -147,7 +148,7 @@ class CropVarietyRepositoryTest {
         // When: crop2에 동일한 품종명 "청과" 저장
         CropVariety variety2 = CropVariety.builder()
                 .varietyName("청과")  // 같은 품종명
-                .crop(crop2)          // 다른 작물
+                .cropType(cropType2)          // 다른 작물
                 .build();
         CropVariety savedVariety2 = cropVarietyRepository.save(variety2);
         entityManager.flush();
@@ -155,7 +156,7 @@ class CropVarietyRepositoryTest {
         // Then: 다른 작물이므로 정상 저장됨
         assertThat(savedVariety2.getVarietyId()).isNotNull();
         assertThat(savedVariety2.getVarietyName()).isEqualTo("청과");
-        assertThat(savedVariety2.getCrop().getCropId()).isEqualTo(crop2.getCropId());
+        assertThat(savedVariety2.getCropType().getTypeId()).isEqualTo(cropType2.getTypeId());
     }
 
     @Test
@@ -164,7 +165,7 @@ class CropVarietyRepositoryTest {
         // Given: 첫 번째 품종 저장
         CropVariety variety1 = CropVariety.builder()
                 .varietyName("방울토마토")
-                .crop(crop1)
+                .cropType(cropType1)
                 .build();
         cropVarietyRepository.save(variety1);
         entityManager.flush();
@@ -172,7 +173,7 @@ class CropVarietyRepositoryTest {
         // When & Then: 동일한 작물+품종명 조합으로 저장 시도 시 예외 발생
         CropVariety variety2 = CropVariety.builder()
                 .varietyName("방울토마토")  // 중복된 품종명
-                .crop(crop1)                 // 동일한 작물
+                .cropType(cropType1)                 // 동일한 작물
                 .build();
 
         assertThatThrownBy(() -> {
@@ -180,4 +181,31 @@ class CropVarietyRepositoryTest {
             entityManager.flush();  // flush 시점에 composite unique 제약 조건 검증
         }).isInstanceOf(DataIntegrityViolationException.class);
     }
+
+    @Test
+    @DisplayName("품종명 업데이트 성공")
+    void updateCropVarietyName_Success() {
+        // Given: 품종 저장
+        CropVariety variety = CropVariety.builder()
+                .varietyName("방울토마토")
+                .cropType(cropType1)
+                .build();
+        CropVariety savedVariety = cropVarietyRepository.save(variety);
+        entityManager.flush();
+        entityManager.clear();
+
+        // When: 품종명 업데이트
+        CropVariety foundVariety = cropVarietyRepository.findById(savedVariety.getVarietyId())
+                .orElseThrow();
+        foundVariety.updateCropVarietyName("대추토마토");
+        entityManager.flush();
+        entityManager.clear();
+
+        // Then: 품종명이 변경되었는지 검증
+        CropVariety updatedVariety = cropVarietyRepository.findById(savedVariety.getVarietyId())
+                .orElseThrow();
+        assertThat(updatedVariety.getVarietyName()).isEqualTo("대추토마토");
+        assertThat(updatedVariety.getUpdatedAt()).isNotNull();
+    }
+
 }

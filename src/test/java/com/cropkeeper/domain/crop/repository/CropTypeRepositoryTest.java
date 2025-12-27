@@ -1,6 +1,6 @@
 package com.cropkeeper.domain.crop.repository;
 
-import com.cropkeeper.domain.crop.entity.Crop;
+import com.cropkeeper.domain.crop.entity.CropType;
 import com.cropkeeper.domain.crop.entity.CropCategory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,10 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DataJpaTest
-class CropRepositoryTest {
+class CropTypeRepositoryTest {
 
     @Autowired
-    private CropRepository cropRepository;
+    private CropTypeRepository cropTypeRepository;
 
     @Autowired
     private TestEntityManager em;
@@ -40,41 +40,41 @@ class CropRepositoryTest {
     @DisplayName("작물 저장 성공")
     void save_Success() {
         // Given: 새로운 작물 엔티티 생성
-        Crop crop = Crop.builder()
-                .cropName("토마토")
+        CropType cropType = CropType.builder()
+                .typeName("토마토")
                 .category(category)
                 .build();
 
         // When: 작물 저장
-        Crop savedCrop = cropRepository.save(crop);
+        CropType savedCropType = cropTypeRepository.save(cropType);
         em.flush();
         em.clear();
 
         // Then: 저장된 작물 검증
-        assertThat(savedCrop.getCropId()).isNotNull();
-        assertThat(savedCrop.getCropName()).isEqualTo("토마토");
-        assertThat(savedCrop.getCategory().getCategoryId()).isEqualTo(category.getCategoryId());
-        assertThat(savedCrop.getCreatedAt()).isNotNull();
+        assertThat(savedCropType.getTypeId()).isNotNull();
+        assertThat(savedCropType.getTypeName()).isEqualTo("토마토");
+        assertThat(savedCropType.getCategory().getCategoryId()).isEqualTo(category.getCategoryId());
+        assertThat(savedCropType.getCreatedAt()).isNotNull();
     }
 
     @Test
     @DisplayName("작물명으로 조회 성공")
     void findByCropName_Success() {
         // Given: 작물 저장
-        Crop crop = Crop.builder()
-                .cropName("오이")
+        CropType cropType = CropType.builder()
+                .typeName("오이")
                 .category(category)
                 .build();
-        em.persist(crop);
+        em.persist(cropType);
         em.flush();
         em.clear();
 
         // When: 작물명으로 조회
-        Optional<Crop> foundCrop = cropRepository.findByCropName("오이");
+        Optional<CropType> foundCrop = cropTypeRepository.findByCropName("오이");
 
         // Then: 조회 결과 검증
         assertThat(foundCrop).isPresent();
-        assertThat(foundCrop.get().getCropName()).isEqualTo("오이");
+        assertThat(foundCrop.get().getTypeName()).isEqualTo("오이");
         assertThat(foundCrop.get().getCategory().getCategoryName()).isEqualTo("채소류");
     }
 
@@ -84,7 +84,7 @@ class CropRepositoryTest {
         // Given: 데이터 없음
 
         // When: 존재하지 않는 작물명으로 조회
-        Optional<Crop> foundCrop = cropRepository.findByCropName("존재하지않는작물");
+        Optional<CropType> foundCrop = cropTypeRepository.findByCropName("존재하지않는작물");
 
         // Then: Empty Optional 반환
         assertThat(foundCrop).isEmpty();
@@ -94,42 +94,42 @@ class CropRepositoryTest {
     @DisplayName("작물 ID로 조회 성공")
     void findById_Success() {
         // Given: 작물 저장
-        Crop crop = Crop.builder()
-                .cropName("상추")
+        CropType cropType = CropType.builder()
+                .typeName("상추")
                 .category(category)
                 .build();
-        crop = em.persist(crop);
+        cropType = em.persist(cropType);
         em.flush();
         em.clear();
 
         // When: ID로 조회
-        Optional<Crop> foundCrop = cropRepository.findById(crop.getCropId());
+        Optional<CropType> foundCrop = cropTypeRepository.findById(cropType.getTypeId());
 
         // Then: 조회 결과 검증
         assertThat(foundCrop).isPresent();
-        assertThat(foundCrop.get().getCropId()).isEqualTo(crop.getCropId());
-        assertThat(foundCrop.get().getCropName()).isEqualTo("상추");
+        assertThat(foundCrop.get().getTypeId()).isEqualTo(cropType.getTypeId());
+        assertThat(foundCrop.get().getTypeName()).isEqualTo("상추");
     }
 
     @Test
     @DisplayName("중복된 작물명 저장 시도 시 예외 발생")
     void save_DuplicateCropName_ThrowsException() {
         // Given: 동일한 작물명으로 첫 번째 작물 저장
-        Crop crop1 = Crop.builder()
-                .cropName("토마토")
+        CropType cropType1 = CropType.builder()
+                .typeName("토마토")
                 .category(category)
                 .build();
-        cropRepository.save(crop1);
+        cropTypeRepository.save(cropType1);
         em.flush();
 
         // When & Then: 중복된 작물명으로 저장 시도 시 예외 발생
-        Crop crop2 = Crop.builder()
-                .cropName("토마토")  // 중복된 작물명
+        CropType cropType2 = CropType.builder()
+                .typeName("토마토")  // 중복된 작물명
                 .category(category)
                 .build();
 
         assertThatThrownBy(() -> {
-            cropRepository.save(crop2);
+            cropTypeRepository.save(cropType2);
             em.flush();  // flush 시점에 unique 제약 조건 검증
         }).isInstanceOf(DataIntegrityViolationException.class);
     }

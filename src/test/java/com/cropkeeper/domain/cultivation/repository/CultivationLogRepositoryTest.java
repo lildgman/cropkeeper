@@ -1,6 +1,6 @@
 package com.cropkeeper.domain.cultivation.repository;
 
-import com.cropkeeper.domain.crop.entity.Crop;
+import com.cropkeeper.domain.crop.entity.CropType;
 import com.cropkeeper.domain.crop.entity.CropCategory;
 import com.cropkeeper.domain.crop.entity.CropVariety;
 import com.cropkeeper.domain.cultivation.entity.CultivationLog;
@@ -76,19 +76,19 @@ class CultivationLogRepositoryTest {
         return em.persist(category);
     }
 
-    private Crop createAndPersistCrop(CropCategory category, String cropName) {
-        Crop crop = Crop.builder()
+    private CropType createAndPersistCrop(CropCategory category, String cropName) {
+        CropType cropType = CropType.builder()
                 .category(category)
-                .cropName(cropName)
+                .typeName(cropName)
                 .build();
 
-        return em.persist(crop);
+        return em.persist(cropType);
 
     }
 
-    private CropVariety createAndPersistVariety(Crop crop, String varietyName) {
+    private CropVariety createAndPersistVariety(CropType cropType, String varietyName) {
         CropVariety variety = CropVariety.builder()
-                .crop(crop)
+                .cropType(cropType)
                 .varietyName(varietyName)
                 .build();
 
@@ -128,8 +128,8 @@ class CultivationLogRepositoryTest {
         Farm farm2 = createAndPersistFarm(member, "농장2");
 
         CropCategory category = createAndPersistCategory("과채류");
-        Crop crop = createAndPersistCrop(category, "토마토");
-        CropVariety variety = createAndPersistVariety(crop, "완숙토마토");
+        CropType cropType = createAndPersistCrop(category, "토마토");
+        CropVariety variety = createAndPersistVariety(cropType, "완숙토마토");
 
         // farm1에 재배기록 3개
         createAndPersistCultivationLog(farm1, member, variety, LocalDateTime.now().minusDays(3), 100L);
@@ -159,8 +159,8 @@ class CultivationLogRepositoryTest {
         Farm farm = createAndPersistFarm(member, TEST_FARM_NAME);
 
         CropCategory category = createAndPersistCategory("과채류");
-        Crop crop = createAndPersistCrop(category, "토마토");
-        CropVariety variety = createAndPersistVariety(crop, "완숙토마토");
+        CropType cropType = createAndPersistCrop(category, "토마토");
+        CropVariety variety = createAndPersistVariety(cropType, "완숙토마토");
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime tenDaysAgo = now.minusDays(10);
@@ -197,9 +197,9 @@ class CultivationLogRepositoryTest {
         Farm farm = createAndPersistFarm(member, TEST_FARM_NAME);
 
         CropCategory category = createAndPersistCategory("과채류");
-        Crop crop = createAndPersistCrop(category, "토마토");
-        CropVariety variety1 = createAndPersistVariety(crop, "완숙토마토");
-        CropVariety variety2 = createAndPersistVariety(crop, "방울토마토");
+        CropType cropType = createAndPersistCrop(category, "토마토");
+        CropVariety variety1 = createAndPersistVariety(cropType, "완숙토마토");
+        CropVariety variety2 = createAndPersistVariety(cropType, "방울토마토");
 
         // variety1 재배기록 2개
         createAndPersistCultivationLog(farm, member, variety1, LocalDateTime.now().minusDays(2), 100L);
