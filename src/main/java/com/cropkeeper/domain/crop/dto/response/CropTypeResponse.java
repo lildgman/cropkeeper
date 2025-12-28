@@ -17,10 +17,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CropResponse {
+public class CropTypeResponse {
 
-    private Long cropId;
-    private String cropName;
+    private Long typeId;
+    private String typeName;
     private Long categoryId;
     private String categoryName;
     private LocalDateTime createdAt;
@@ -31,10 +31,10 @@ public class CropResponse {
      * @param cropType 작물 엔티티
      * @return 작물 응답 DTO
      */
-    public static CropResponse from(CropType cropType) {
-        return CropResponse.builder()
-                .cropId(cropType.getTypeId())
-                .cropName(cropType.getTypeName())
+    public static CropTypeResponse from(CropType cropType) {
+        return CropTypeResponse.builder()
+                .typeId(cropType.getTypeId())
+                .typeName(cropType.getTypeName())
                 .categoryId(cropType.getCategory().getCategoryId())
                 .categoryName(cropType.getCategory().getCategoryName())
                 .createdAt(cropType.getCreatedAt())

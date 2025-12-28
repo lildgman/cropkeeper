@@ -22,6 +22,8 @@ public enum CropErrorCode implements ErrorCode {
     // 작물 관련 에러
     CROP_NOT_FOUND("C101", "작물을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_CROP_REQUEST("C102", "잘못된 작물 요청입니다.", HttpStatus.BAD_REQUEST),
+    DUPLICATE_CROP_TYPE_NAME("C103", "이미 존재하는 작물명입니다.", HttpStatus.CONFLICT),
+    CROP_TYPE_NOT_FOUND("C104", "작물을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // 품종 관련 에러
     CROP_VARIETY_NOT_FOUND("C201", "품종을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);

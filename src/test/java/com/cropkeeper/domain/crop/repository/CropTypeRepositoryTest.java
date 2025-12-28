@@ -59,7 +59,7 @@ class CropTypeRepositoryTest {
 
     @Test
     @DisplayName("작물명으로 조회 성공")
-    void findByCropName_Success() {
+    void findByCropTypeName_Success() {
         // Given: 작물 저장
         CropType cropType = CropType.builder()
                 .typeName("오이")
@@ -70,7 +70,7 @@ class CropTypeRepositoryTest {
         em.clear();
 
         // When: 작물명으로 조회
-        Optional<CropType> foundCrop = cropTypeRepository.findByCropName("오이");
+        Optional<CropType> foundCrop = cropTypeRepository.findByCropTypeName("오이");
 
         // Then: 조회 결과 검증
         assertThat(foundCrop).isPresent();
@@ -80,11 +80,11 @@ class CropTypeRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 작물명 조회 시 Empty 반환")
-    void findByCropName_NotFound() {
+    void findByCropTypeName_NotFound() {
         // Given: 데이터 없음
 
         // When: 존재하지 않는 작물명으로 조회
-        Optional<CropType> foundCrop = cropTypeRepository.findByCropName("존재하지않는작물");
+        Optional<CropType> foundCrop = cropTypeRepository.findByCropTypeName("존재하지않는작물");
 
         // Then: Empty Optional 반환
         assertThat(foundCrop).isEmpty();

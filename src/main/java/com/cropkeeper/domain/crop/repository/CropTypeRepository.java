@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface CropTypeRepository extends JpaRepository<CropType, Long> {
 
     @Query("SELECT ct FROM CropType ct WHERE ct.typeName = :typeName AND ct.deleted = false")
-    Optional<CropType> findByCropName(@Param("typeName") String typeName);
+    Optional<CropType> findByCropTypeName(@Param("typeName") String typeName);
 
     @Query("SELECT ct FROM CropType ct WHERE ct.typeId = :typeId AND ct.deleted = false")
     Optional<CropType> findById(@Param("typeId") Long typeId);
