@@ -5,6 +5,7 @@ import com.cropkeeper.domain.crop.dto.response.CropTypeResponse;
 import com.cropkeeper.domain.crop.entity.CropCategory;
 import com.cropkeeper.domain.crop.entity.CropType;
 import com.cropkeeper.domain.crop.exception.CropCategoryNotFoundException;
+import com.cropkeeper.domain.crop.exception.CropTypeNotFoundException;
 import com.cropkeeper.domain.crop.exception.DuplicateCropTypeNameException;
 import com.cropkeeper.domain.crop.repository.CropCategoryRepository;
 import com.cropkeeper.domain.crop.repository.CropTypeRepository;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -52,6 +54,41 @@ public class CropTypeService {
         return CropTypeResponse.from(savedCropType);
     }
 
+    /**
+     * 전체 작물 조회
+     * @return 작물 목록
+     */
+    public List<CropTypeResponse> getAllCropTypes() {
+
+        List<CropType> cropTypes = cropTypeRepository.findAllByDeletedFalse();
+
+        return cropTypes.stream()
+                .map(CropTypeResponse::from)
+                .toList();
+
+    }
+
+    /**
+     * 작물 ID로 조회
+     * @param typeId
+     * @return
+     */
+    public CropTypeResponse getCropTypeById(Long typeId) {
+
+        return CropTypeResponse.from(findById(typeId));
+
+    }
+
+    public List<CropTypeResponse> getCropTypesByCategoryId(Long categoryId) {
+
+        List<CropType> cropTypes = cropTypeRepository.findByCategoryCategoryIdAndDeletedFalse(categoryId);
+
+        return cropTypes.stream()
+                .map(CropTypeResponse::from)
+                .toList();
+    }
+
+
 
 
     /**
@@ -80,4 +117,13 @@ public class CropTypeService {
                 .orElseThrow(() -> new CropCategoryNotFoundException(categoryId));
 
     }
+
+    private CropType findById(Long typeId) {
+
+        return cropTypeRepository.findById(typeId)
+                .orElseThrow(() -> new CropTypeNotFoundException(typeId));
+    }
+
+
+
 }

@@ -67,9 +67,11 @@ Present your test plan clearly, grouped by category. Then ask: "Please review th
 
 **CRITICAL**: Do NOT proceed to Step 3 until the user explicitly approves.
 
-### STEP 3: Write Test Code
+### STEP 3: Show Test Code (DO NOT WRITE DIRECTLY)
 
-Once approved, write test code following these standards:
+**CRITICAL**: You MUST NOT use Write, Edit, or any file modification tools in this step. Instead, you will SHOW the test code to the user so they can type it themselves.
+
+Once approved, present test code following these standards:
 
 **Naming Conventions**:
 - Test class: `{ClassUnderTest}Test` (e.g., `CropServiceTest`)
@@ -115,9 +117,34 @@ void methodName_condition_expectedResult() {
 - Each test method validates ONE specific behavior
 - If testing multiple scenarios, write multiple test methods
 
+### How to Present Test Code to User:
+
+**IMPORTANT**: Present test code ONE TEST AT A TIME, not all at once.
+
+For each test case:
+1. Show the test code in a code block
+2. Explain what this test verifies
+3. Wait for the user to confirm they have typed it
+4. Only after confirmation, proceed to the next test case
+
+Example format:
+```
+다음 테스트 케이스를 작성해주세요:
+
+[테스트 케이스 설명]
+
+```java
+// Code block here
+```
+
+이 테스트를 타이핑 완료하셨으면 "완료" 또는 "다음"이라고 말씀해주세요.
+```
+
 ### STEP 4: Execute and Verify Tests
 
-After writing tests:
+**IMPORTANT**: Only proceed to this step after the user has typed all test code and confirms they are ready to run tests.
+
+After the user has written all tests:
 1. Run ALL tests using `./gradlew test`
 2. Verify that ALL tests pass
 3. If any test fails:
@@ -142,7 +169,7 @@ Check your tests against this quality checklist:
 
 Report any checklist items that need attention.
 
-### STEP 6: Coverage Report and Commit
+### STEP 6: Coverage Report
 
 Finally:
 1. Generate test coverage report if possible (JaCoCo)
@@ -150,8 +177,10 @@ Finally:
    - Line coverage percentage
    - Branch coverage percentage
    - Any uncovered scenarios
-3. If coverage is adequate, commit with message:
+3. Provide a suggested commit message format:
    `git commit -m "test: <테스트 대상> 테스트 추가"`
+
+**NOTE**: Do NOT commit automatically. Let the user decide when to commit.
 
 ## Critical Principles You Follow
 

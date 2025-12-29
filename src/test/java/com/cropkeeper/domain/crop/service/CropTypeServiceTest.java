@@ -5,6 +5,7 @@ import com.cropkeeper.domain.crop.dto.response.CropTypeResponse;
 import com.cropkeeper.domain.crop.entity.CropCategory;
 import com.cropkeeper.domain.crop.entity.CropType;
 import com.cropkeeper.domain.crop.exception.CropCategoryNotFoundException;
+import com.cropkeeper.domain.crop.exception.CropTypeNotFoundException;
 import com.cropkeeper.domain.crop.exception.DuplicateCropTypeNameException;
 import com.cropkeeper.domain.crop.repository.CropCategoryRepository;
 import com.cropkeeper.domain.crop.repository.CropTypeRepository;
@@ -15,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -139,4 +141,198 @@ class CropTypeServiceTest {
         verify(cropCategoryRepository, times(1)).findById(categoryId);
         verify(cropTypeRepository, never()).save(any(CropType.class));
     }
+
+    @Test
+    @DisplayName("전체 작물 목록 조회")
+    void getAllCropTypes_Success() {
+
+        // given
+        CropCategory category1 = CropCategory.builder()
+                .categoryId(1L)
+                .categoryName("과채류")
+                .build();
+
+        CropCategory category2 = CropCategory.builder()
+                .categoryId(2L)
+                .categoryName("엽채류")
+                .build();
+
+        CropType cropType1 = CropType.builder()
+                .typeId(1L)
+                .typeName("토마토")
+                .category(category1)
+                .build();
+
+        CropType cropType2 = CropType.builder()
+                .typeId(2L)
+                .typeName("오이")
+                .category(category1)
+                .build();
+
+        CropType cropType3 = CropType.builder()
+                .typeId(3L)
+                .typeName("상추")
+                .category(category2)
+                .build();
+
+        List<CropType> cropTypes = List.of(cropType1, cropType2, cropType3);
+
+        when(cropTypeRepository.findAllByDeletedFalse()).thenReturn(cropTypes);
+
+        // when
+        List<CropTypeResponse> responses = cropTypeService.getAllCropTypes();
+
+        // then
+        assertThat(responses).isNotNull();
+        assertThat(responses).hasSize(3);
+        assertThat(responses.get(0).getTypeName()).isEqualTo("토마토");
+        assertThat(responses.get(1).getTypeName()).isEqualTo("오이");
+        assertThat(responses.get(2).getTypeName()).isEqualTo("상추");
+
+        verify(cropTypeRepository, times(1)).findAllByDeletedFalse();
+
+    }
+
+
+    @Test
+    @DisplayName("전체 작물 목록 조회 성공 - 빈 목록")
+    void getAllCropTypes_EmptyList() {
+
+        // given
+        when(cropTypeRepository.findAllByDeletedFalse()).thenReturn(List.of());
+
+        // when
+        List<CropTypeResponse> responses = cropTypeService.getAllCropTypes();
+
+        // then
+        assertThat(responses).isNotNull();
+        assertThat(responses).isEmpty();
+
+        verify(cropTypeRepository, times(1)).findAllByDeletedFalse();
+    }
+
+    @Test
+    @DisplayName("작물 ID로 조회 성공")
+    void getCropTypeById_Success() {
+
+        // given
+        Long typeId = 1L;
+        String typeName = "토마토";
+
+        CropCategory category = CropCategory.builder()
+                .categoryId(1L)
+                .categoryName("과채류")
+                .build();
+
+        CropType cropType = CropType.builder()
+                .typeId(typeId)
+                .typeName(typeName)
+                .category(category)
+                .build();
+
+        when(cropTypeRepository.findById(typeId)).thenReturn(Optional.of(cropType));
+
+        // when
+        CropTypeResponse response = cropTypeService.getCropTypeById(typeId);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getTypeId()).isEqualTo(typeId);
+        assertThat(response.getTypeName()).isEqualTo(typeName);
+        assertThat(response.getCategoryId()).isEqualTo(1L);
+        assertThat(response.getCategoryName()).isEqualTo("과채류");
+    }
+
+    @Test
+    @DisplayName("작물 ID로 조회 실패 - 존재하지 않는 작물")
+    void getCropTypeById_Fail_NotFound() {
+
+        // given
+        Long typeId = 999L;
+
+        when(cropTypeRepository.findById(typeId)).thenReturn(Optional.empty());
+
+        // when, then
+        assertThatThrownBy(() -> cropTypeService.getCropTypeById(typeId))
+                .isInstanceOf(CropTypeNotFoundException.class)
+                .hasMessageContaining("작물을 찾을 수 없습니다");
+
+        verify(cropTypeRepository, times(1)).findById(typeId);
+    }
+
+    @Test
+    @DisplayName("카테고리별 작물 목록 조회 성공")
+    void getCropTypesByCategoryId_Success() {
+
+        // given
+        // 카테고리 생성
+        Long categoryId = 1L;
+        CropCategory category = CropCategory.builder()
+                .categoryId(categoryId)
+                .categoryName("과채류")
+                .build();
+
+        // 카테고리에 속할 작물 생성
+        CropType cropType1 = CropType.builder()
+                .typeId(1L)
+                .typeName("토마토")
+                .category(category)
+                .build();
+
+        CropType cropType2 = CropType.builder()
+                .typeId(2L)
+                .typeName("오이")
+                .category(category)
+                .build();
+
+        List<CropType> cropTypes = List.of(cropType1, cropType2);
+
+        when(cropTypeRepository.findByCategoryCategoryIdAndDeletedFalse(categoryId)).thenReturn(cropTypes);
+
+        // when
+        List<CropTypeResponse> responses = cropTypeService.getCropTypesByCategoryId(categoryId);
+
+        // then
+        assertThat(responses).isNotNull();
+        assertThat(responses).hasSize(2);
+
+        verify(cropTypeRepository, times(1)).findByCategoryCategoryIdAndDeletedFalse(categoryId);
+    }
+
+    @Test
+    @DisplayName("카테고리별 작물 목록 조회 성공 - 빈목록")
+    void getCropTypesByCategoryId_EmptyList() {
+
+        // given
+        Long categoryId = 1L;
+
+        when(cropTypeRepository.findByCategoryCategoryIdAndDeletedFalse(categoryId)).thenReturn(List.of());
+
+        // when
+        List<CropTypeResponse> responses = cropTypeService.getCropTypesByCategoryId(categoryId);
+
+        // then
+        assertThat(responses).isEmpty();
+
+        verify(cropTypeRepository, times(1)).findByCategoryCategoryIdAndDeletedFalse(categoryId);
+
+    }
+
+    @Test
+    @DisplayName("작물 id로 조회 실패 - 삭제된 작물")
+    void getCropTypesById_Fail_DeletedCropType() {
+
+        // given
+        Long typeId = 1L;
+
+        when(cropTypeRepository.findById(typeId)).thenReturn(Optional.empty());
+
+        // when
+        assertThatThrownBy(() -> cropTypeService.getCropTypeById(typeId))
+                .isInstanceOf(CropTypeNotFoundException.class)
+                .hasMessageContaining("작물을 찾을 수 없습니다");
+
+        verify(cropTypeRepository, times(1)).findById(typeId);
+    }
+
 }

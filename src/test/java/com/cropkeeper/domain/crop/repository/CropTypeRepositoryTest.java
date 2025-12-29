@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -132,5 +133,182 @@ class CropTypeRepositoryTest {
             cropTypeRepository.save(cropType2);
             em.flush();  // flush 시점에 unique 제약 조건 검증
         }).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    @DisplayName("전체 작물 조회")
+    void findAllByDeletedFalse_Success() {
+
+        // given
+        CropType cropType1 = CropType.builder()
+                .typeName("토마토")
+                .category(category)
+                .build();
+
+        CropType cropType2 = CropType.builder()
+                .typeName("오이")
+                .category(category)
+                .build();
+
+        CropType cropType3 = CropType.builder()
+                .typeName("상추")
+                .category(category)
+                .build();
+
+        em.persist(cropType1);
+        em.persist(cropType2);
+        em.persist(cropType3);
+        em.flush();
+
+        cropType3.delete();
+        em.flush();
+        em.clear();
+
+        // when
+        List<CropType> cropTypes = cropTypeRepository.findAllByDeletedFalse();
+
+        // then
+        assertThat(cropTypes).hasSize(2);
+        assertThat(cropTypes)
+                .extracting(CropType::getTypeName)
+                .containsExactlyInAnyOrder("토마토", "오이");
+        assertThat(cropTypes).allMatch(ct -> !ct.isDeleted());
+    }
+
+    @Test
+    @DisplayName("전체 작물 조회 - 빈목록")
+    void findAllByDeletedFalse_EmtpyList() {
+
+        // when
+        List<CropType> cropTypes = cropTypeRepository.findAllByDeletedFalse();
+        // then
+        assertThat(cropTypes).isEmpty();
+
+    }
+
+    @Test
+    @DisplayName("작물 id로 조회 - 존재하지 않는 ID")
+    void findById_존재하지않는id_empty() {
+
+        // when
+        Optional<CropType> foundCropType = cropTypeRepository.findById(999L);
+
+        // then
+        assertThat(foundCropType).isEmpty();
+    }
+
+    @Test
+    @DisplayName("작물 ID 조회 - 삭제된 작물은 empty")
+    void findById_삭제된CropType() {
+
+        // given
+        CropType cropType = CropType.builder()
+                .typeName("토마토")
+                .category(category)
+                .build();
+
+        cropType = em.persist(cropType);
+        em.flush();
+
+        Long typeId = cropType.getTypeId();
+
+        // 삭제처리
+        cropType.delete();
+        em.flush();
+        em.clear();
+
+        // when
+        Optional<CropType> foundCropType = cropTypeRepository.findById(typeId);
+
+        // then
+        assertThat(foundCropType).isEmpty();
+    }
+
+    @Test
+    @DisplayName("카테고리별 작물 조회 - 특정 카테고리 작물 조회")
+    void findByCategoryCategoryIdAndDeleteFalse_특정카테고리CropType조회() {
+
+        // given
+        // 두번째 카테고리
+        CropCategory category2 = CropCategory.builder()
+                .categoryName("과일류")
+                .build();
+        category2 = em.persist(category2);
+
+        // 첫번째 카테고리에 속할 작물
+        CropType cropType1 = CropType.builder()
+                .typeName("토마토")
+                .category(category)
+                .build();
+
+        CropType cropType2 = CropType.builder()
+                .typeName("아스파라거스")
+                .category(category)
+                .build();
+
+        // 두번째 카테고리에 속할 작물
+        CropType cropType3 = CropType.builder()
+                .typeName("딸기")
+                .category(category2)
+                .build();
+
+        em.persist(cropType1);
+        em.persist(cropType2);
+        em.persist(cropType3);
+        em.flush();
+        em.clear();
+
+        // when
+        List<CropType> cropTypes = cropTypeRepository.findByCategoryCategoryIdAndDeletedFalse(category.getCategoryId());
+
+        // then
+        assertThat(cropTypes).hasSize(2);
+        assertThat(cropTypes)
+                .extracting(CropType::getTypeName)
+                .containsExactlyInAnyOrder("토마토", "아스파라거스");
+        assertThat(cropTypes)
+                .allMatch(ct -> ct.getCategory().getCategoryId().equals(category.getCategoryId()));
+    }
+
+    @Test
+    @DisplayName("카테고리별 작물 조회 - 해당 카테고리에 작물이 없으면 빈 리스트반환")
+    void findByCategoryCategoryIdAndDeletedFalse_CropType없음_빈리스트() {
+
+        // when
+        List<CropType> cropTypes = cropTypeRepository.findByCategoryCategoryIdAndDeletedFalse(category.getCategoryId());
+
+        // then
+        assertThat(cropTypes).isEmpty();
+    }
+
+    @Test
+    @DisplayName("카테고리별 작물 조회 - 삭제된 작물 제외 후 조회")
+    void findByCategoryCategoryIdAndDeletedFalse_삭제된CropType제외() {
+
+        // given
+        CropType cropType1 = CropType.builder()
+                .typeName("토마토")
+                .category(category)
+                .build();
+
+        CropType cropType2 = CropType.builder()
+                .typeName("오이")
+                .category(category)
+                .build();
+
+        em.persist(cropType1);
+        em.persist(cropType2);
+        em.flush();
+
+        cropType2.delete();
+        em.flush();
+        em.clear();
+
+        // when
+        List<CropType> cropTypes = cropTypeRepository.findByCategoryCategoryIdAndDeletedFalse(category.getCategoryId());
+
+        // then
+        assertThat(cropTypes).hasSize(1);
+
     }
 }

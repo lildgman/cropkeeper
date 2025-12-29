@@ -12,6 +12,7 @@ import com.cropkeeper.domain.member.entity.MemberRole;
 import com.cropkeeper.domain.member.repository.MemberRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -346,6 +348,264 @@ class CropTypeControllerTest {
                 .andExpect(jsonPath("$.message").value(containsString("작물 카테고리를 찾을 수 없습니다")));
     }
 
+    @Test
+    @DisplayName("전체 작물 조회 성공")
+    void getAllCropTypes_Success() throws Exception {
 
+        // given
+        CropCategory category1 = CropCategory.builder()
+                .categoryName("테스트카테고리1")
+                .build();
+        cropCategoryRepository.save(category1);
 
+        CropCategory category2 = CropCategory.builder()
+                .categoryName("테스트카테고리2")
+                .build();
+        cropCategoryRepository.save(category2);
+
+        CropType cropType1 = CropType.builder()
+                .typeName("테스트작물1")
+                .category(category1)
+                .build();
+        cropTypeRepository.save(cropType1);
+
+        CropType cropType2 = CropType.builder()
+                .typeName("테스트작물2")
+                .category(category1)
+                .build();
+        cropTypeRepository.save(cropType2);
+
+        CropType cropType3 = CropType.builder()
+                .typeName("테스트작물3")
+                .category(category2)
+                .build();
+        cropTypeRepository.save(cropType3);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-types")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(3));
+    }
+
+    @Test
+    @DisplayName("전체 작물 조회 - 빈 목록")
+    void getAllCropTypes_EmptyList() throws Exception {
+
+        // when, then
+        mockMvc.perform(get("/api/crop-types")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+
+    }
+
+    @Test
+    @DisplayName("전체 작물 조회 - 삭제된 작물 제외")
+    void getAllCropTypes_ExcludeDeletedCrops() throws Exception {
+
+        // given
+        // 카테고리
+        CropCategory category = cropCategoryRepository.findById(testCategoryId).get();
+        CropType cropType1 = CropType.builder()
+                .typeName("테스트작물1")
+                .category(category)
+                .build();
+        cropTypeRepository.save(cropType1);
+
+        // 삭제될 작물
+        CropType cropType2 = CropType.builder()
+                .typeName("삭제될작물")
+                .category(category)
+                .build();
+        cropTypeRepository.save(cropType2);
+        // 작물 삭제
+        cropType2.delete();
+        cropTypeRepository.save(cropType2);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-types")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1));
+
+    }
+
+    @Test
+    @DisplayName("카테고리별 작물 조회 성공")
+    void getCropTypesByCategory_Success() throws Exception {
+
+        // given
+        CropCategory category1 = CropCategory.builder()
+                .categoryName("테스트카테고리1")
+                .build();
+        cropCategoryRepository.save(category1);
+
+        CropCategory category2 = CropCategory.builder()
+                .categoryName("테스트카테고리2")
+                .build();
+        cropCategoryRepository.save(category2);
+
+        // 카테고리1 소속 작물
+        CropType cropType1 = CropType.builder()
+                .typeName("테스트작물1")
+                .category(category1)
+                .build();
+
+        // 카테고리1 소속 작물
+        CropType cropType2 = CropType.builder()
+                .typeName("테스트작물2")
+                .category(category1)
+                .build();
+
+        // 카테고리2 소속 작물
+        CropType cropType3 = CropType.builder()
+                .typeName("테스트작물3")
+                .category(category2)
+                .build();
+
+        cropTypeRepository.save(cropType1);
+        cropTypeRepository.save(cropType2);
+        cropTypeRepository.save(cropType3);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-types")
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("categoryId", category1.getCategoryId().toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    @DisplayName("카테고리별 작물 조회 성공 - 빈목록")
+    void getCropTypesByCategory_EmptyList() throws Exception {
+
+        // given
+
+        // when, then
+        mockMvc.perform(get("/api/crop-types")
+                        .param("categoryId", testCategoryId.toString())
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    @DisplayName("카테고리별 작물 조회 성공 - 삭제된 작물")
+    void getCropTypesByCategory_ExcludeDeletedCrops() throws Exception {
+
+        // given
+        CropCategory category = cropCategoryRepository.findById(testCategoryId).get();
+        CropType cropType1 = CropType.builder()
+                .typeName("테스트작물1")
+                .category(category)
+                .build();
+        cropTypeRepository.save(cropType1);
+
+        CropType cropType2 = CropType.builder()
+                .typeName("테스트작물2")
+                .category(category)
+                .build();
+        cropTypeRepository.save(cropType2);
+
+        // 삭제할 작물
+        CropType cropType3 = CropType.builder()
+                .typeName("테스트작물3")
+                .category(category)
+                .build();
+        cropTypeRepository.save(cropType3);
+        cropType3.delete();
+        cropTypeRepository.save(cropType3);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-types")
+                        .param("categoryId", testCategoryId.toString())
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    @DisplayName("작물 ID로 조회 성공")
+    void getCropTypeById_Success() throws Exception {
+
+        // given
+        CropCategory category = cropCategoryRepository.findById(testCategoryId).get();
+        CropType cropType = CropType.builder()
+                .typeName("테스트작물")
+                .category(category)
+                .build();
+        CropType savedCropType = cropTypeRepository.save(cropType);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-types/{typeId}", savedCropType.getTypeId())
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.typeId").value(savedCropType.getTypeId()))
+                .andExpect(jsonPath("$.typeName").value("테스트작물"))
+                .andExpect(jsonPath("$.categoryId").value(testCategoryId))
+                .andExpect(jsonPath("$.categoryName").value("테스트카테고리"));
+
+    }
+
+    @Test
+    @DisplayName("작물 ID로 조회 실패 - 존재하지 않은 ID")
+    void getCropTypeById_Fail_NotFound() throws Exception {
+
+        // given
+        Long nonExistentId = 999L;
+
+        // when, then
+        mockMvc.perform(get("/api/crop-types/{typeId}", nonExistentId)
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(containsString("작물을 찾을 수 없습니다")));
+    }
+
+    @Test
+    @DisplayName("작물 ID로 조회 실패 - 삭제된 작물")
+    void getCropTypeById_Fail_DeletedCrop() throws Exception {
+
+        // given
+        CropCategory category = cropCategoryRepository.findById(testCategoryId).get();
+        CropType cropType = CropType.builder()
+                .typeName("테스트작물")
+                .category(category)
+                .build();
+        CropType savedCropType = cropTypeRepository.save(cropType);
+
+        savedCropType.delete();
+        cropTypeRepository.save(cropType);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-types/{typeId}", savedCropType.getTypeId())
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(containsString("작물을 찾을 수 없습니다")));
+
+    }
 }

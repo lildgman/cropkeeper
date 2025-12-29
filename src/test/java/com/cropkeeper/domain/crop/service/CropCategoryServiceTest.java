@@ -451,4 +451,5 @@ class CropCategoryServiceTest {
         verify(cropTypeRepository, times(1)).existsByCategoryCategoryId(categoryId);
         verify(categoryRepository, never()).delete(any(CropCategory.class));
     }
+
 }
