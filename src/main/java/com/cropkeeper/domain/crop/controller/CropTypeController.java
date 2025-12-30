@@ -1,6 +1,7 @@
 package com.cropkeeper.domain.crop.controller;
 
 import com.cropkeeper.domain.crop.dto.request.CreateCropTypeRequest;
+import com.cropkeeper.domain.crop.dto.request.UpdateCropTypeRequest;
 import com.cropkeeper.domain.crop.dto.response.CropTypeResponse;
 import com.cropkeeper.domain.crop.service.CropTypeService;
 import com.cropkeeper.global.security.UserPrincipal;
@@ -63,6 +64,25 @@ public class CropTypeController {
             @PathVariable Long typeId) {
 
         CropTypeResponse response = cropTypeService.getCropTypeById(typeId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 작물 수정 API
+     *
+     * @param userPrincipal 인증된 사용자 (관리자)
+     * @param typeId 작물 ID
+     * @param request 수정 요청
+     * @return 수정된 작물 응답
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{typeId}")
+    public ResponseEntity<CropTypeResponse> updateCropType(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long typeId,
+            @Valid @RequestBody UpdateCropTypeRequest request) {
+
+        CropTypeResponse response = cropTypeService.updateCropType(typeId, request);
         return ResponseEntity.ok(response);
     }
 }

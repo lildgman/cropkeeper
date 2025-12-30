@@ -24,7 +24,7 @@ public class CropCategory extends BaseTimeEntity {
     @Column(name = "category_name", nullable = false, unique = true, length = 50)
     private String categoryName;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "category")
     @Builder.Default
     private List<CropType> cropTypes = new ArrayList<>();
 

@@ -48,6 +48,15 @@ public class CropType extends BaseTimeEntity {
         this.typeName = newName;
     }
 
+    /**
+     * 카테고리 변경
+     *
+     * @param newCategory 새 카테고리
+     */
+    public void updateCategory(CropCategory newCategory) {
+        this.category = newCategory;
+    }
+
     public boolean isDeleted() {
         return this.deleted;
     }

@@ -67,9 +67,9 @@ Present your test plan clearly, grouped by category. Then ask: "Please review th
 
 **CRITICAL**: Do NOT proceed to Step 3 until the user explicitly approves.
 
-### STEP 3: Show Test Code (DO NOT WRITE DIRECTLY)
+### STEP 3: Write Test Code (ONE AT A TIME)
 
-**CRITICAL**: You MUST NOT use Write, Edit, or any file modification tools in this step. Instead, you will SHOW the test code to the user so they can type it themselves.
+**CRITICAL**: You MUST use Write or Edit tools to write test code directly to the file. Write ONE TEST AT A TIME and wait for user confirmation before proceeding to the next test.
 
 Once approved, present test code following these standards:
 
@@ -117,34 +117,29 @@ void methodName_condition_expectedResult() {
 - Each test method validates ONE specific behavior
 - If testing multiple scenarios, write multiple test methods
 
-### How to Present Test Code to User:
+### How to Write Test Code:
 
-**IMPORTANT**: Present test code ONE TEST AT A TIME, not all at once.
+**IMPORTANT**: Write test code ONE TEST AT A TIME, not all at once.
 
 For each test case:
-1. Show the test code in a code block
+1. Use the Edit tool to add ONE test method to the test file
 2. Explain what this test verifies
-3. Wait for the user to confirm they have typed it
-4. Only after confirmation, proceed to the next test case
+3. Ask the user: "이 테스트를 확인하셨으면 '다음' 또는 '계속'이라고 말씀해주세요."
+4. Wait for user confirmation before proceeding to the next test case
+5. Only after confirmation, write the next test using Edit tool
 
-Example format:
-```
-다음 테스트 케이스를 작성해주세요:
-
-[테스트 케이스 설명]
-
-```java
-// Code block here
-```
-
-이 테스트를 타이핑 완료하셨으면 "완료" 또는 "다음"이라고 말씀해주세요.
-```
+**Workflow**:
+- First test: Use Edit tool to add the test method
+- Wait for user confirmation
+- Second test: Use Edit tool to add the next test method
+- Wait for user confirmation
+- Continue this pattern until all tests are written
 
 ### STEP 4: Execute and Verify Tests
 
-**IMPORTANT**: Only proceed to this step after the user has typed all test code and confirms they are ready to run tests.
+**IMPORTANT**: Only proceed to this step after all test code has been written and the user confirms they are ready to run tests.
 
-After the user has written all tests:
+After all tests have been written:
 1. Run ALL tests using `./gradlew test`
 2. Verify that ALL tests pass
 3. If any test fails:

@@ -1,6 +1,7 @@
 package com.cropkeeper.domain.crop.service;
 
 import com.cropkeeper.domain.crop.dto.request.CreateCropTypeRequest;
+import com.cropkeeper.domain.crop.dto.request.UpdateCropTypeRequest;
 import com.cropkeeper.domain.crop.dto.response.CropTypeResponse;
 import com.cropkeeper.domain.crop.entity.CropCategory;
 import com.cropkeeper.domain.crop.entity.CropType;
@@ -60,7 +61,7 @@ class CropTypeServiceTest {
                 .category(category)
                 .build();
 
-        when(cropTypeRepository.findByCropTypeName(typeName)).thenReturn(Optional.empty());
+        when(cropTypeRepository.existsByTypeNameAndDeletedFalse(typeName)).thenReturn(false);
         when(cropCategoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(cropTypeRepository.save(any(CropType.class))).thenReturn(savedCropType);
 
@@ -74,7 +75,7 @@ class CropTypeServiceTest {
         assertThat(response.getCategoryId()).isEqualTo(categoryId);
         assertThat(response.getCategoryName()).isEqualTo(categoryName);
 
-        verify(cropTypeRepository, times(1)).findByCropTypeName(typeName);
+        verify(cropTypeRepository, times(1)).existsByTypeNameAndDeletedFalse(typeName);
         verify(cropCategoryRepository, times(1)).findById(categoryId);
         verify(cropTypeRepository, times(1)).save(any(CropType.class));
 
@@ -94,25 +95,14 @@ class CropTypeServiceTest {
                 .categoryId(categoryId)
                 .build();
 
-        CropCategory category = CropCategory.builder()
-                .categoryId(categoryId)
-                .categoryName(categoryName)
-                .build();
-
-        CropType existingCropType = CropType.builder()
-                .typeId(1L)
-                .typeName(typeName)
-                .category(category)
-                .build();
-
-        when(cropTypeRepository.findByCropTypeName(typeName)).thenReturn(Optional.of(existingCropType));
+        when(cropTypeRepository.existsByTypeNameAndDeletedFalse(typeName)).thenReturn(true);
 
         // when, then
         assertThatThrownBy(() -> cropTypeService.createCropType(request))
                 .isInstanceOf(DuplicateCropTypeNameException.class)
                 .hasMessageContaining("이미 존재하는 작물명입니다");
 
-        verify(cropTypeRepository, times(1)).findByCropTypeName(typeName);
+        verify(cropTypeRepository, times(1)).existsByTypeNameAndDeletedFalse(typeName);
         verify(cropCategoryRepository, never()).findById(anyLong());
         verify(cropTypeRepository, never()).save(any(CropType.class));
     }
@@ -129,7 +119,7 @@ class CropTypeServiceTest {
                 .categoryId(categoryId)
                 .build();
 
-        when(cropTypeRepository.findByCropTypeName(typeName)).thenReturn(Optional.empty());
+        when(cropTypeRepository.existsByTypeNameAndDeletedFalse(typeName)).thenReturn(false);
         when(cropCategoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
         // when, then
@@ -137,7 +127,7 @@ class CropTypeServiceTest {
                 .isInstanceOf(CropCategoryNotFoundException.class)
                 .hasMessageContaining("작물 카테고리를 찾을 수 없습니다");
 
-        verify(cropTypeRepository, times(1)).findByCropTypeName(typeName);
+        verify(cropTypeRepository, times(1)).existsByTypeNameAndDeletedFalse(typeName);
         verify(cropCategoryRepository, times(1)).findById(categoryId);
         verify(cropTypeRepository, never()).save(any(CropType.class));
     }
@@ -327,7 +317,7 @@ class CropTypeServiceTest {
 
         when(cropTypeRepository.findById(typeId)).thenReturn(Optional.empty());
 
-        // when
+        // when, then
         assertThatThrownBy(() -> cropTypeService.getCropTypeById(typeId))
                 .isInstanceOf(CropTypeNotFoundException.class)
                 .hasMessageContaining("작물을 찾을 수 없습니다");
@@ -335,4 +325,51 @@ class CropTypeServiceTest {
         verify(cropTypeRepository, times(1)).findById(typeId);
     }
 
+    @Test
+    @DisplayName("작물 수정 성공 - typeName만 변경")
+    void updateCropType_typeNameOnly_Success() {
+
+        // given
+        // 기존 작물 등록
+        Long typeId = 1L;
+        String originalName = "토마토";
+
+        String newName = "방울토마토";
+
+        Long categoryId = 1L;
+        String categoryName = "과채류";
+
+        CropCategory category = CropCategory.builder()
+                .categoryId(categoryId)
+                .categoryName(categoryName)
+                .build();
+
+        CropType existingCropType = CropType.builder()
+                .typeId(typeId)
+                .typeName(originalName)
+                .category(category)
+                .build();
+
+        UpdateCropTypeRequest request = UpdateCropTypeRequest.builder()
+                .typeName(newName)
+                .categoryId(null)
+                .build();
+
+        when(cropTypeRepository.findById(typeId)).thenReturn(Optional.of(existingCropType));
+        when(cropTypeRepository.existsByTypeNameAndDeletedFalse(newName)).thenReturn(false);
+
+        // when
+        CropTypeResponse response = cropTypeService.updateCropType(typeId, request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getTypeId()).isEqualTo(typeId);
+        assertThat(response.getTypeName()).isEqualTo(newName);
+        assertThat(response.getCategoryId()).isEqualTo(categoryId);
+        assertThat(response.getCategoryName()).isEqualTo(categoryName);
+
+        verify(cropTypeRepository, times(1)).findById(typeId);
+        verify(cropTypeRepository, times(1)).existsByTypeNameAndDeletedFalse(newName);
+
+    }
 }

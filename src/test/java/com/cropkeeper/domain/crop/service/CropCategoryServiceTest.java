@@ -42,7 +42,7 @@ class CropCategoryServiceTest {
     void createCategory_Success() {
 
         // given
-        String categoryName = "야채류";
+        String categoryName = "테스트카테고리";
 
         CreateCropCategoryRequest request = CreateCropCategoryRequest.builder()
                 .categoryName(categoryName)
@@ -53,7 +53,7 @@ class CropCategoryServiceTest {
                 .categoryName(categoryName)
                 .build();
 
-        when(categoryRepository.findByCategoryName(categoryName)).thenReturn(Optional.empty());
+        when(categoryRepository.existsByCategoryNameAndDeletedFalse(categoryName)).thenReturn(false);
         when(categoryRepository.save(any(CropCategory.class))).thenReturn(savedCategory);
 
         // when
@@ -64,7 +64,7 @@ class CropCategoryServiceTest {
         assertThat(response.getCategoryId()).isEqualTo(1L);
         assertThat(response.getCategoryName()).isEqualTo(categoryName);
 
-        verify(categoryRepository, times(1)).findByCategoryName(categoryName);
+        verify(categoryRepository, times(1)).existsByCategoryNameAndDeletedFalse(categoryName);
         verify(categoryRepository, times(1)).save(any(CropCategory.class));
 
     }
@@ -85,14 +85,14 @@ class CropCategoryServiceTest {
                 .categoryName(categoryName)
                 .build();
 
-        when(categoryRepository.findByCategoryName(categoryName)).thenReturn(Optional.of(existingCategory));
+        when(categoryRepository.existsByCategoryNameAndDeletedFalse(categoryName)).thenReturn(true);
 
         // when, then
         assertThatThrownBy(() -> cropCategoryService.createCategory(request))
                 .isInstanceOf(DuplicateCropCategoryNameException.class)
                 .hasMessageContaining("이미 존재하는 카테고리명입니다");
 
-        verify(categoryRepository, times(1)).findByCategoryName(categoryName);
+        verify(categoryRepository, times(1)).existsByCategoryNameAndDeletedFalse(categoryName);
         verify(categoryRepository, never()).save(any(CropCategory.class));
     }
 
@@ -252,8 +252,7 @@ class CropCategoryServiceTest {
                 .build();
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-        when(cropTypeRepository.existsByCategoryCategoryId(categoryId)).thenReturn(false);
-        when(categoryRepository.findByCategoryName(newName)).thenReturn(Optional.empty());
+        when(categoryRepository.existsByCategoryNameAndDeletedFalse(newName)).thenReturn(false);
 
         // when
         CropCategoryResponse response = cropCategoryService.updateCategory(categoryId, request);
@@ -264,8 +263,7 @@ class CropCategoryServiceTest {
         assertThat(response.getCategoryName()).isEqualTo(newName);
 
         verify(categoryRepository, times(1)).findById(categoryId);
-        verify(cropTypeRepository, times(1)).existsByCategoryCategoryId(categoryId);
-        verify(categoryRepository, times(1)).findByCategoryName(newName);
+        verify(categoryRepository, times(1)).existsByCategoryNameAndDeletedFalse(newName);
     }
 
     @Test
@@ -286,7 +284,6 @@ class CropCategoryServiceTest {
                 .build();
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-        when(cropTypeRepository.existsByCategoryCategoryId(categoryId)).thenReturn(false);
 
         // when
         CropCategoryResponse response = cropCategoryService.updateCategory(categoryId, request);
@@ -297,7 +294,6 @@ class CropCategoryServiceTest {
         assertThat(response.getCategoryName()).isEqualTo(categoryName);
 
         verify(categoryRepository, times(1)).findById(categoryId);
-        verify(cropTypeRepository, times(1)).existsByCategoryCategoryId(categoryId);
         verify(categoryRepository, never()).findByCategoryName(anyString());
 
     }
@@ -324,34 +320,6 @@ class CropCategoryServiceTest {
     }
 
     @Test
-    @DisplayName("카테고리 수정 실패 - 작물이 존재")
-    void updateCategory_fail_작물이_존재() {
-
-        // given
-        Long categoryId = 1L;
-        CropCategory category = CropCategory.builder()
-                .categoryId(categoryId)
-                .categoryName("과채류")
-                .build();
-
-        UpdateCropCategoryRequest request = UpdateCropCategoryRequest.builder()
-                .categoryName("과일류")
-                .build();
-
-        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-        when(cropTypeRepository.existsByCategoryCategoryId(categoryId)).thenReturn(true);
-
-        // when, then
-        assertThatThrownBy(() -> cropCategoryService.updateCategory(categoryId, request))
-                .isInstanceOf(CropCategoryHasCropsException.class)
-                .hasMessageContaining("해당 카테고리에 연결된 작물이 있어");
-
-        verify(categoryRepository, times(1)).findById(categoryId);
-        verify(cropTypeRepository, times(1)).existsByCategoryCategoryId(categoryId);
-        verify(categoryRepository, never()).findByCategoryName(anyString());
-    }
-
-    @Test
     @DisplayName("카테고리 수정 실패 - 중복된 새 이름")
     void updateCategory_fail_중복된_새_이름() {
 
@@ -365,18 +333,12 @@ class CropCategoryServiceTest {
                 .categoryName(oldName)
                 .build();
 
-        CropCategory existingCategory = CropCategory.builder()
-                .categoryId(2L)
-                .categoryName(newName)
-                .build();
-
         UpdateCropCategoryRequest request = UpdateCropCategoryRequest.builder()
                 .categoryName(newName)
                 .build();
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-        when(cropTypeRepository.existsByCategoryCategoryId(categoryId)).thenReturn(false);
-        when(categoryRepository.findByCategoryName(newName)).thenReturn(Optional.of(existingCategory));
+        when(categoryRepository.existsByCategoryNameAndDeletedFalse(newName)).thenReturn(true);
 
         // when, then
         assertThatThrownBy(() -> cropCategoryService.updateCategory(categoryId, request))
@@ -384,8 +346,7 @@ class CropCategoryServiceTest {
                 .hasMessageContaining("이미 존재하는 카테고리명입니다");
 
         verify(categoryRepository, times(1)).findById(categoryId);
-        verify(cropTypeRepository, times(1)).existsByCategoryCategoryId(categoryId);
-        verify(categoryRepository, times(1)).findByCategoryName(newName);
+        verify(categoryRepository, times(1)).existsByCategoryNameAndDeletedFalse(newName);
     }
 
     @Test

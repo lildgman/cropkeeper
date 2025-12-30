@@ -96,14 +96,12 @@ public class CropCategoryService {
      * @param request 수정 요청
      * @return 수정된 카테고리 응답
      * @throws CropCategoryNotFoundException 카테고리를 찾을 수 없는 경우
-     * @throws CropCategoryHasCropsException 카테고리에 작물이 존재하는 경우
      * @throws DuplicateCropCategoryNameException 중복된 카테고리명인 경우
      */
     @Transactional
     public CropCategoryResponse updateCategory(Long categoryId, UpdateCropCategoryRequest request) {
 
         CropCategory category = findById(categoryId);
-        validateNoCrops(categoryId, "수정");
 
         String newCategoryName = request.getCategoryName();
 
@@ -139,7 +137,7 @@ public class CropCategoryService {
 
     private void validateCategoryNameNotDuplicate(String categoryName) {
 
-        if (categoryRepository.findByCategoryName(categoryName).isPresent()) {
+        if (categoryRepository.existsByCategoryNameAndDeletedFalse(categoryName)) {
             log.warn("카테고리명이 존재합니다. categoryName = {}", categoryName);
             throw new DuplicateCropCategoryNameException(categoryName);
         }
