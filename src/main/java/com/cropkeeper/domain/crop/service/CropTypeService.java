@@ -145,8 +145,8 @@ public class CropTypeService {
             if (!cropType.getCategory().getCategoryId().equals(newCategoryId)) {
                 CropCategory newCategory = findCategoryById(newCategoryId);
                 cropType.updateCategory(newCategory);
-                log.info("작물 카테고리 수정 완료: typeId = {}, 새 카테고리 = {} ({})",
-                        typeId, newCategory.getCategoryName(), newCategoryId);
+                log.info("작물 카테고리 수정 완료: typeId = {}, 새 카테고리 = {}",
+                        typeId, newCategory.getCategoryName());
             }
         }
 
