@@ -85,4 +85,21 @@ public class CropTypeController {
         CropTypeResponse response = cropTypeService.updateCropType(typeId, request);
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * 작물 삭제 API
+     *
+     * @param userPrincipal 인증된 사용자 (관리자)
+     * @param typeId 삭제할 작물 ID
+     * @return 204 No Content
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{typeId}")
+    public ResponseEntity<Void> deleteCropType(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable Long typeId) {
+
+        cropTypeService.deleteCropType(typeId);
+        return ResponseEntity.noContent().build();
+    }
 }

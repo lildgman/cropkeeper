@@ -7,11 +7,13 @@ import com.cropkeeper.domain.crop.entity.CropCategory;
 import com.cropkeeper.domain.crop.entity.CropType;
 import com.cropkeeper.domain.crop.exception.CropCategoryNotFoundException;
 import com.cropkeeper.domain.crop.exception.CropErrorCode;
+import com.cropkeeper.domain.crop.exception.CropTypeHasVarietiesException;
 import com.cropkeeper.domain.crop.exception.CropTypeNotFoundException;
 import com.cropkeeper.domain.crop.exception.DuplicateCropTypeNameException;
 import com.cropkeeper.domain.crop.exception.InvalidCropRequestException;
 import com.cropkeeper.domain.crop.repository.CropCategoryRepository;
 import com.cropkeeper.domain.crop.repository.CropTypeRepository;
+import com.cropkeeper.domain.crop.repository.CropVarietyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ public class CropTypeService {
 
     private final CropTypeRepository cropTypeRepository;
     private final CropCategoryRepository cropCategoryRepository;
+    private final CropVarietyRepository cropVarietyRepository;
 
     /**
      * 작물 생성
@@ -151,6 +154,38 @@ public class CropTypeService {
         }
 
         return CropTypeResponse.from(cropType);
+    }
+
+    /**
+     * 작물 삭제 (Soft Delete)
+     *
+     * @param typeId 삭제할 작물 ID
+     * @throws CropTypeNotFoundException 작물을 찾을 수 없는 경우
+     * @throws CropTypeHasVarietiesException 연결된 품종이 있는 경우
+     */
+    @Transactional
+    public void deleteCropType(Long typeId) {
+
+        CropType cropType = findById(typeId);
+        validateNoVarieties(typeId);
+
+        cropType.delete();
+        log.info("작물 삭제 완료: typeId = {}, typeName = {}",
+                typeId, cropType.getTypeName());
+    }
+
+    /**
+     * 품종 존재 여부 검증
+     *
+     * @param typeId 작물 ID
+     * @throws CropTypeHasVarietiesException 품종이 존재하는 경우
+     */
+    private void validateNoVarieties(Long typeId) {
+
+        if (cropVarietyRepository.existsByCropTypeTypeIdAndDeletedFalse(typeId)) {
+            log.warn("품종이 연결된 작물 삭제 시도: typeId = {}", typeId);
+            throw new CropTypeHasVarietiesException(typeId);
+        }
     }
 
 

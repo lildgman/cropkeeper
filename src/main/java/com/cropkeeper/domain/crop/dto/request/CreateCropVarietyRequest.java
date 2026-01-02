@@ -24,10 +24,10 @@ public class CreateCropVarietyRequest {
     private Long categoryId;
 
     @NotBlank(message = "작물명은 필수입니다.")
-    @Size(max = 50, message = "작물명은 50자 이하여야 합니다.")
+    @Size(max = 20, message = "작물명은 20자 이하여야 합니다.")
     private String cropName;
 
     @NotBlank(message = "품종명은 필수입니다.")
-    @Size(max = 50, message = "품종명은 50자 이하여야 합니다.")
+    @Size(max = 20, message = "품종명은 20자 이하여야 합니다.")
     private String varietyName;
 }

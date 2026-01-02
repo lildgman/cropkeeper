@@ -6,11 +6,13 @@ import com.cropkeeper.domain.crop.dto.response.CropTypeResponse;
 import com.cropkeeper.domain.crop.entity.CropCategory;
 import com.cropkeeper.domain.crop.entity.CropType;
 import com.cropkeeper.domain.crop.exception.CropCategoryNotFoundException;
+import com.cropkeeper.domain.crop.exception.CropTypeHasVarietiesException;
 import com.cropkeeper.domain.crop.exception.CropTypeNotFoundException;
 import com.cropkeeper.domain.crop.exception.DuplicateCropTypeNameException;
 import com.cropkeeper.domain.crop.exception.InvalidCropRequestException;
 import com.cropkeeper.domain.crop.repository.CropCategoryRepository;
 import com.cropkeeper.domain.crop.repository.CropTypeRepository;
+import com.cropkeeper.domain.crop.repository.CropVarietyRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +35,9 @@ class CropTypeServiceTest {
 
     @Mock
     private CropCategoryRepository cropCategoryRepository;
+
+    @Mock
+    private CropVarietyRepository cropVarietyRepository;
 
     @InjectMocks
     private CropTypeService cropTypeService;
@@ -758,5 +763,89 @@ class CropTypeServiceTest {
         verify(cropTypeRepository, never()).findById(anyLong());
         verify(cropTypeRepository, never()).existsByTypeNameAndDeletedFalse(anyString());
         verify(cropCategoryRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    @DisplayName("작물 삭제 성공 - 품종이 없는 경우")
+    void deleteCropType_Success() {
+
+        // given
+        Long typeId = 1L;
+        CropCategory category = CropCategory.builder()
+                .categoryId(1L)
+                .categoryName("과채류")
+                .build();
+
+        CropType cropType = CropType.builder()
+                .typeId(typeId)
+                .typeName("토마토")
+                .category(category)
+                .build();
+
+        when(cropTypeRepository.findById(typeId)).thenReturn(Optional.of(cropType));
+        when(cropVarietyRepository.existsByCropTypeTypeIdAndDeletedFalse(typeId))
+                .thenReturn(false);
+
+        // when
+        cropTypeService.deleteCropType(typeId);
+
+        // then
+        assertThat(cropType.isDeleted()).isTrue();
+        assertThat(cropType.getDeletedAt()).isNotNull();
+
+        verify(cropTypeRepository, times(1)).findById(typeId);
+        verify(cropVarietyRepository, times(1))
+                .existsByCropTypeTypeIdAndDeletedFalse(typeId);
+    }
+
+    @Test
+    @DisplayName("작물 삭제 실패 - 존재하지 않는 작물")
+    void deleteCropType_Fail_NotFound() {
+
+        // given
+        Long typeId = 999L;
+        when(cropTypeRepository.findById(typeId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> cropTypeService.deleteCropType(typeId))
+                .isInstanceOf(CropTypeNotFoundException.class)
+                .hasMessageContaining("작물을 찾을 수 없습니다");
+
+        verify(cropTypeRepository, times(1)).findById(typeId);
+        verify(cropVarietyRepository, never())
+                .existsByCropTypeTypeIdAndDeletedFalse(anyLong());
+    }
+
+    @Test
+    @DisplayName("작물 삭제 실패 - 연결된 품종이 존재하는 경우")
+    void deleteCropType_Fail_HasVarieties() {
+
+        // given
+        Long typeId = 1L;
+        CropCategory category = CropCategory.builder()
+                .categoryId(1L)
+                .categoryName("과채류")
+                .build();
+
+        CropType cropType = CropType.builder()
+                .typeId(typeId)
+                .typeName("토마토")
+                .category(category)
+                .build();
+
+        when(cropTypeRepository.findById(typeId)).thenReturn(Optional.of(cropType));
+        when(cropVarietyRepository.existsByCropTypeTypeIdAndDeletedFalse(typeId))
+                .thenReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> cropTypeService.deleteCropType(typeId))
+                .isInstanceOf(CropTypeHasVarietiesException.class)
+                .hasMessageContaining("해당 작물에 연결된 품종이 있어 삭제할 수 없습니다");
+
+        assertThat(cropType.isDeleted()).isFalse();
+
+        verify(cropTypeRepository, times(1)).findById(typeId);
+        verify(cropVarietyRepository, times(1))
+                .existsByCropTypeTypeIdAndDeletedFalse(typeId);
     }
 }
