@@ -37,7 +37,7 @@ public class ControllerLoggingAspect {
      * 모든 @RestController의 public 메서드를 대상으로 AOP 적용
      * @NoLogging 어노테이션이 있으면 로깅 제외
      */
-    @Around("execution(public * com.cropkeeper.domain..controller.*Controller.*(..))")
+    @Around("execution(public * com.cropkeeper..controller.*Controller.*(..))")
     public Object logApiRequest(ProceedingJoinPoint joinPoint) throws Throwable {
         // @NoLogging 체크
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();

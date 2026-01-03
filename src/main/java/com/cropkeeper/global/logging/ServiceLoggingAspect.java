@@ -33,7 +33,7 @@ public class ServiceLoggingAspect {
      * private 메서드는 제외 (내부 헬퍼 메서드는 로깅 불필요)
      * @NoLogging 어노테이션이 있으면 로깅 제외
      */
-    @Around("execution(public * com.cropkeeper.domain..service.*Service.*(..))")
+    @Around("execution(public * com.cropkeeper..service.*Service.*(..))")
     public Object logServiceMethod(ProceedingJoinPoint joinPoint) throws Throwable {
         // @NoLogging 체크
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();

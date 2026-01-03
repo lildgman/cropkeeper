@@ -1,0 +1,36 @@
+package com.cropkeeper.inventory.entity;
+
+import com.cropkeeper.crop.entity.CropVariety;
+import com.cropkeeper.farm.entity.Farm;
+import com.cropkeeper.global.common.BaseTimeEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "crop_inventory",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"farm_id", "variety_id"})
+    })
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+public class CropInventory extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "crop_inventory_id")
+    private Long cropInventoryId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "farm_id", nullable = false)
+    private Farm farm;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "variety_id", nullable = false)
+    private CropVariety variety;
+
+    @Column(name = "quantity_box", nullable = false)
+    private Long quantityBox;
+
+}

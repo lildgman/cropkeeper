@@ -1,8 +1,8 @@
 package com.cropkeeper.global.security;
 
-import com.cropkeeper.domain.auth.exception.DeletedMemberLoginException;
-import com.cropkeeper.domain.member.entity.Member;
-import com.cropkeeper.domain.member.repository.MemberRepository;
+import com.cropkeeper.auth.exception.DeletedMemberLoginException;
+import com.cropkeeper.member.entity.Member;
+import com.cropkeeper.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
