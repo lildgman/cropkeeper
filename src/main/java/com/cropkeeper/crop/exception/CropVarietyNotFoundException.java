@@ -2,9 +2,6 @@ package com.cropkeeper.crop.exception;
 
 import com.cropkeeper.global.exception.BaseException;
 
-/**
- * 품종을 찾을 수 없을 때 발생하는 예외
- */
 public class CropVarietyNotFoundException extends BaseException {
 
     public CropVarietyNotFoundException(Long varietyId) {

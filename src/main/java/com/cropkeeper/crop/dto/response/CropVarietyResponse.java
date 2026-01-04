@@ -22,8 +22,8 @@ public class CropVarietyResponse {
 
     private Long varietyId;
     private String varietyName;
-    private Long cropId;
-    private String cropName;
+    private Long typeId;
+    private String typeName;
     private Long categoryId;
     private String categoryName;
     private LocalDateTime createdAt;
@@ -38,8 +38,8 @@ public class CropVarietyResponse {
         return CropVarietyResponse.builder()
                 .varietyId(variety.getVarietyId())
                 .varietyName(variety.getVarietyName())
-                .cropId(variety.getCropType().getTypeId())
-                .cropName(variety.getCropType().getTypeName())
+                .typeId(variety.getCropType().getTypeId())
+                .typeName(variety.getCropType().getTypeName())
                 .categoryId(variety.getCropType().getCategory().getCategoryId())
                 .categoryName(variety.getCropType().getCategory().getCategoryName())
                 .createdAt(variety.getCreatedAt())

@@ -57,7 +57,7 @@ public class CropCategoryService {
      */
     public List<CropCategoryResponse> getAllCategories() {
 
-        List<CropCategory> categories = categoryRepository.findAll();
+        List<CropCategory> categories = categoryRepository.findAllByDeletedFalse();
 
         return categories.stream()
                 .map(CropCategoryResponse::from)

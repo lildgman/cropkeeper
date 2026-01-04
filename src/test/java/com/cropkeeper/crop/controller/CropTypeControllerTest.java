@@ -352,7 +352,7 @@ class CropTypeControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("작물 카테고리를 찾을 수 없습니다")));
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물 카테고리입니다.")));
     }
 
     @Test
@@ -588,7 +588,7 @@ class CropTypeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("작물을 찾을 수 없습니다")));
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물입니다.")));
     }
 
     @Test
@@ -612,7 +612,7 @@ class CropTypeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("작물을 찾을 수 없습니다")));
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물입니다.")));
 
     }
 
@@ -850,7 +850,7 @@ class CropTypeControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("작물을 찾을 수 없습니다")));
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물입니다.")));
     }
 
     @Test
@@ -881,7 +881,7 @@ class CropTypeControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("작물을 찾을 수 없습니다")));
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물입니다.")));
     }
 
     @Test
@@ -944,7 +944,7 @@ class CropTypeControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("작물 카테고리를 찾을 수 없습니다")));
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물 카테고리입니다.")));
     }
 
     @Test
@@ -1088,7 +1088,7 @@ class CropTypeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("작물을 찾을 수 없습니다")));
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물입니다.")));
     }
 
     @Test

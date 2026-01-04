@@ -2,9 +2,6 @@ package com.cropkeeper.crop.exception;
 
 import com.cropkeeper.global.exception.BaseException;
 
-/**
- * 작물이 연결된 카테고리를 수정 또는 삭제하려 할 때 발생하는 예외
- */
 public class CropCategoryHasCropsException extends BaseException {
 
     public CropCategoryHasCropsException(Long categoryId, String action) {

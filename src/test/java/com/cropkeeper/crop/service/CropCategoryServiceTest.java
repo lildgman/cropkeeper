@@ -118,7 +118,7 @@ class CropCategoryServiceTest {
                 .build();
 
         List<CropCategory> categories = Arrays.asList(category1, category2, category3);
-        when(categoryRepository.findAll()).thenReturn(categories);
+        when(categoryRepository.findAllByDeletedFalse()).thenReturn(categories);
 
         // when
         List<CropCategoryResponse> response = cropCategoryService.getAllCategories();
@@ -130,7 +130,7 @@ class CropCategoryServiceTest {
                 .extracting("categoryName")
                 .containsExactly("과채류", "엽채류", "근채류");
 
-        verify(categoryRepository, times(1)).findAll();
+        verify(categoryRepository, times(1)).findAllByDeletedFalse();
 
     }
 
@@ -148,7 +148,7 @@ class CropCategoryServiceTest {
         assertThat(response).isNotNull();
         assertThat(response).isEmpty();
 
-        verify(categoryRepository, times(1)).findAll();
+        verify(categoryRepository, times(1)).findAllByDeletedFalse();
     }
 
     @Test
@@ -186,7 +186,7 @@ class CropCategoryServiceTest {
         // when, then
         assertThatThrownBy(() -> cropCategoryService.getCategoryById(categoryId))
                 .isInstanceOf(CropCategoryNotFoundException.class)
-                .hasMessageContaining("작물 카테고리를 찾을 수 없습니다.");
+                .hasMessageContaining("존재하지 않는 작물 카테고리입니다.");
 
         verify(categoryRepository, times(1)).findById(categoryId);
 
@@ -229,7 +229,7 @@ class CropCategoryServiceTest {
         // when, then
         assertThatThrownBy(() -> cropCategoryService.getCategoryByName(categoryName))
                 .isInstanceOf(CropCategoryNotFoundException.class)
-                .hasMessageContaining("작물 카테고리를 찾을 수 없습니다");
+                .hasMessageContaining("존재하지 않는 작물 카테고리입니다.");
 
         verify(categoryRepository, times(1)).findByCategoryName(categoryName);
     }
@@ -314,7 +314,7 @@ class CropCategoryServiceTest {
         // when, then
         assertThatThrownBy(() -> cropCategoryService.updateCategory(categoryId, request))
                 .isInstanceOf(CropCategoryNotFoundException.class)
-                .hasMessageContaining("작물 카테고리를 찾을 수 없습니다");
+                .hasMessageContaining("존재하지 않는 작물 카테고리입니다.");
 
         verify(categoryRepository, times(1)).findById(categoryId);
         verify(cropTypeRepository, never()).existsByCategoryCategoryId(anyLong());
@@ -383,7 +383,7 @@ class CropCategoryServiceTest {
         // when, then
         assertThatThrownBy(() -> cropCategoryService.deleteCategory(categoryId))
                 .isInstanceOf(CropCategoryNotFoundException.class)
-                .hasMessageContaining("작물 카테고리를 찾을 수 없습니다");
+                .hasMessageContaining("존재하지 않는 작물 카테고리입니다.");
 
         verify(categoryRepository, times(1)).findById(categoryId);
         verify(cropTypeRepository, never()).existsByCategoryCategoryId(anyLong());

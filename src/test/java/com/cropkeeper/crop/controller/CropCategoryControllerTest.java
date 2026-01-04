@@ -134,7 +134,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(post("/api/categories")
+        mockMvc.perform(post("/api/crop-categories")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -161,7 +161,7 @@ class CropCategoryControllerTest {
         cropCategoryRepository.save(category3);
 
         // when, then
-        mockMvc.perform(get("/api/categories")
+        mockMvc.perform(get("/api/crop-categories")
                         .header("Authorization", "Bearer " + userToken))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -179,7 +179,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(put("/api/categories/{categoryId}", testCategoryId)
+        mockMvc.perform(put("/api/crop-categories/{categoryId}", testCategoryId)
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -196,7 +196,7 @@ class CropCategoryControllerTest {
     void deleteCategory_Success() throws Exception {
 
         // when, then
-        mockMvc.perform(delete("/api/categories/{categoryId}", testCategoryId)
+        mockMvc.perform(delete("/api/crop-categories/{categoryId}", testCategoryId)
                         .header("Authorization", "Bearer " + adminToken))
                 .andDo(print())
                 .andExpect(status().isNoContent());
@@ -212,7 +212,7 @@ class CropCategoryControllerTest {
         cropCategoryRepository.deleteAll();
 
         // when, then
-        mockMvc.perform(get("/api/categories")
+        mockMvc.perform(get("/api/crop-categories")
                         .header("Authorization", "Bearer " + userToken))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -229,7 +229,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(put("/api/categories/{categoryId}", testCategoryId)
+        mockMvc.perform(put("/api/crop-categories/{categoryId}", testCategoryId)
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -250,7 +250,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(post("/api/categories")
+        mockMvc.perform(post("/api/crop-categories")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -270,7 +270,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(post("/api/categories")
+        mockMvc.perform(post("/api/crop-categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
@@ -288,7 +288,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(post("/api/categories")
+        mockMvc.perform(post("/api/crop-categories")
                         .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -306,7 +306,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(put("/api/categories/{categoryId}", testCategoryId)
+        mockMvc.perform(put("/api/crop-categories/{categoryId}", testCategoryId)
                         .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -319,7 +319,7 @@ class CropCategoryControllerTest {
     void deleteCategory_Fail_UserRole() throws Exception {
 
         // when, then
-        mockMvc.perform(delete("/api/categories/{categoryId}", testCategoryId)
+        mockMvc.perform(delete("/api/crop-categories/{categoryId}", testCategoryId)
                         .header("Authorization", "Bearer " + userToken))
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -331,7 +331,7 @@ class CropCategoryControllerTest {
     void getCategories_Fail_NoAuth() throws Exception {
 
         // when, then
-        mockMvc.perform(get("/api/categories"))
+        mockMvc.perform(get("/api/crop-categories"))
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
@@ -348,7 +348,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(post("/api/categories")
+        mockMvc.perform(post("/api/crop-categories")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -368,7 +368,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(post("/api/categories")
+        mockMvc.perform(post("/api/crop-categories")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -390,7 +390,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(post("/api/categories")
+        mockMvc.perform(post("/api/crop-categories")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -410,7 +410,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(put("/api/categories/{categoryId}", testCategoryId)
+        mockMvc.perform(put("/api/crop-categories/{categoryId}", testCategoryId)
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -431,7 +431,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(post("/api/categories")
+        mockMvc.perform(post("/api/crop-categories")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -448,11 +448,11 @@ class CropCategoryControllerTest {
         Long nonExistCategoryId = 9999L;
 
         // when, then
-        mockMvc.perform(get("/api/categories/{categoryId}", nonExistCategoryId)
+        mockMvc.perform(get("/api/crop-categories/{categoryId}", nonExistCategoryId)
                         .header("Authorization", "Bearer " + userToken))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("작물 카테고리를 찾을 수 없습니다")));
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물 카테고리입니다.")));
     }
 
     @Test
@@ -463,11 +463,11 @@ class CropCategoryControllerTest {
         String nonExistCategoryName = "없는_카테고리_이름";
 
         // when, then
-        mockMvc.perform(get("/api/categories/name/{categoryName}", nonExistCategoryName)
+        mockMvc.perform(get("/api/crop-categories/name/{categoryName}", nonExistCategoryName)
                         .header("Authorization", "Bearer " + userToken))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("작물 카테고리를 찾을 수 없습니다")));
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물 카테고리입니다.")));
     }
 
     @Test
@@ -481,13 +481,13 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(put("/api/categories/{categoryId}", nonExistCategoryId)
+        mockMvc.perform(put("/api/crop-categories/{categoryId}", nonExistCategoryId)
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("작물 카테고리를 찾을 수 없습니다")));
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물 카테고리입니다.")));
     }
 
     @Test
@@ -498,11 +498,11 @@ class CropCategoryControllerTest {
         Long nonExistCategoryId = 9999L;
 
         // when, then
-        mockMvc.perform(delete("/api/categories/{categoryId}", nonExistCategoryId)
+        mockMvc.perform(delete("/api/crop-categories/{categoryId}", nonExistCategoryId)
                         .header("Authorization", "Bearer " + adminToken))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(containsString("작물 카테고리를 찾을 수 없습니다")));
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물 카테고리입니다.")));
     }
 
     @Test
@@ -520,7 +520,7 @@ class CropCategoryControllerTest {
                 .build();
 
         // when, then
-        mockMvc.perform(put("/api/categories/{categoryId}", testCategoryId)
+        mockMvc.perform(put("/api/crop-categories/{categoryId}", testCategoryId)
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

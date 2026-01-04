@@ -3,7 +3,6 @@ package com.cropkeeper.crop.repository;
 import com.cropkeeper.crop.entity.CropType;
 import com.cropkeeper.crop.entity.CropCategory;
 import com.cropkeeper.crop.entity.CropVariety;
-import com.cropkeeper.crop.repository.CropVarietyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -89,7 +88,7 @@ class CropVarietyRepositoryTest {
 
         // When: 작물ID와 품종명으로 조회
         Optional<CropVariety> foundVariety = cropVarietyRepository
-                .findByCrop_CropIdAndVarietyName(cropType1.getTypeId(), "대추토마토");
+                .findByCropCropIdAndVarietyName(cropType1.getTypeId(), "대추토마토");
 
         // Then: 조회 결과 검증
         assertThat(foundVariety).isPresent();
@@ -110,7 +109,7 @@ class CropVarietyRepositoryTest {
 
         // When: 존재하지 않는 작물ID로 조회
         Optional<CropVariety> foundVariety = cropVarietyRepository
-                .findByCrop_CropIdAndVarietyName(999L, "방울토마토");
+                .findByCropCropIdAndVarietyName(999L, "방울토마토");
 
         // Then: Empty Optional 반환
         assertThat(foundVariety).isEmpty();
@@ -129,7 +128,7 @@ class CropVarietyRepositoryTest {
 
         // When: 존재하지 않는 품종명으로 조회
         Optional<CropVariety> foundVariety = cropVarietyRepository
-                .findByCrop_CropIdAndVarietyName(cropType1.getTypeId(), "존재하지않는품종");
+                .findByCropCropIdAndVarietyName(cropType1.getTypeId(), "존재하지않는품종");
 
         // Then: Empty Optional 반환
         assertThat(foundVariety).isEmpty();

@@ -132,7 +132,7 @@ class CropTypeServiceTest {
         // when, then
         assertThatThrownBy(() -> cropTypeService.createCropType(request))
                 .isInstanceOf(CropCategoryNotFoundException.class)
-                .hasMessageContaining("작물 카테고리를 찾을 수 없습니다");
+                .hasMessageContaining("존재하지 않는 작물 카테고리입니다.");
 
         verify(cropTypeRepository, times(1)).existsByTypeNameAndDeletedFalse(typeName);
         verify(cropCategoryRepository, times(1)).findById(categoryId);
@@ -252,7 +252,7 @@ class CropTypeServiceTest {
         // when, then
         assertThatThrownBy(() -> cropTypeService.getCropTypeById(typeId))
                 .isInstanceOf(CropTypeNotFoundException.class)
-                .hasMessageContaining("작물을 찾을 수 없습니다");
+                .hasMessageContaining("존재하지 않는 작물입니다.");
 
         verify(cropTypeRepository, times(1)).findById(typeId);
     }
@@ -327,7 +327,7 @@ class CropTypeServiceTest {
         // when, then
         assertThatThrownBy(() -> cropTypeService.getCropTypeById(typeId))
                 .isInstanceOf(CropTypeNotFoundException.class)
-                .hasMessageContaining("작물을 찾을 수 없습니다");
+                .hasMessageContaining("존재하지 않는 작물입니다.");
 
         verify(cropTypeRepository, times(1)).findById(typeId);
     }
@@ -656,7 +656,7 @@ class CropTypeServiceTest {
         // when, then
         assertThatThrownBy(() -> cropTypeService.updateCropType(typeId, request))
                 .isInstanceOf(CropTypeNotFoundException.class)
-                .hasMessageContaining("작물을 찾을 수 없습니다");
+                .hasMessageContaining("존재하지 않는 작물입니다.");
 
         verify(cropTypeRepository, times(1)).findById(typeId);
         verify(cropTypeRepository, never()).existsByTypeNameAndDeletedFalse(anyString());
@@ -737,7 +737,7 @@ class CropTypeServiceTest {
         // when, then
         assertThatThrownBy(() -> cropTypeService.updateCropType(typeId, request))
                 .isInstanceOf(CropCategoryNotFoundException.class)
-                .hasMessageContaining("작물 카테고리를 찾을 수 없습니다");
+                .hasMessageContaining("존재하지 않는 작물 카테고리입니다.");
 
         verify(cropTypeRepository, times(1)).findById(typeId);
         verify(cropCategoryRepository, times(1)).findById(invalidCategoryId);
@@ -810,7 +810,7 @@ class CropTypeServiceTest {
         // when & then
         assertThatThrownBy(() -> cropTypeService.deleteCropType(typeId))
                 .isInstanceOf(CropTypeNotFoundException.class)
-                .hasMessageContaining("작물을 찾을 수 없습니다");
+                .hasMessageContaining("존재하지 않는 작물입니다.");
 
         verify(cropTypeRepository, times(1)).findById(typeId);
         verify(cropVarietyRepository, never())

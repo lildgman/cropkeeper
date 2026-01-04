@@ -27,7 +27,7 @@ public class CropVariety extends BaseTimeEntity {
     @JoinColumn(name = "crop_type_id", nullable = false)
     private CropType cropType;
 
-    @Column(name = "variety_name", nullable = false, length = 50)
+    @Column(name = "variety_name", nullable = false, length = 20)
     private String varietyName;
 
     @Column(name = "deleted", nullable = false)
