@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -44,5 +45,10 @@ public interface CropVarietyRepository extends JpaRepository<CropVariety, Long> 
             "AND cv.deleted = false")
     boolean existsByVarietyNameAndDeletedFalse(@Param("varietyName") String varietyName);
 
-
+    @Query("SELECT cv " +
+            "FROM CropVariety cv " +
+            "JOIN FETCH cv.cropType ct " +
+            "JOIN FETCH ct.category " +
+            "WHERE cv.deleted = false")
+    List<CropVariety> findAllByDeletedFalse();
 }

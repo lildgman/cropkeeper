@@ -3,6 +3,10 @@ package com.cropkeeper.crop.repository;
 import com.cropkeeper.crop.entity.CropType;
 import com.cropkeeper.crop.entity.CropCategory;
 import com.cropkeeper.crop.entity.CropVariety;
+import jakarta.persistence.EntityManager;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -206,6 +211,110 @@ class CropVarietyRepositoryTest {
                 .orElseThrow();
         assertThat(updatedVariety.getVarietyName()).isEqualTo("대추토마토");
         assertThat(updatedVariety.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("전체 조회 시 1번의 쿼리만 발생 - 페치 조인 검증")
+    void findAllByDeletedFalse_SingleQuery_WithFetchJoin() {
+        // Given: 여러 품종 저장
+        CropVariety variety1 = CropVariety.builder()
+                .varietyName("방울토마토")
+                .cropType(cropType1)
+                .build();
+        CropVariety variety2 = CropVariety.builder()
+                .varietyName("대추토마토")
+                .cropType(cropType1)
+                .build();
+        CropVariety variety3 = CropVariety.builder()
+                .varietyName("백다다기")
+                .cropType(cropType2)
+                .build();
+
+        cropVarietyRepository.save(variety1);
+        cropVarietyRepository.save(variety2);
+        cropVarietyRepository.save(variety3);
+        entityManager.flush();
+        entityManager.clear();
+
+        // Hibernate Statistics 활성화
+        EntityManager em = entityManager.getEntityManager();
+        SessionFactory sessionFactory = em.unwrap(Session.class).getSessionFactory();
+        Statistics stats = sessionFactory.getStatistics();
+        stats.setStatisticsEnabled(true);
+        stats.clear();
+
+        // When: 전체 조회
+        List<CropVariety> varieties = cropVarietyRepository.findAllByDeletedFalse();
+
+        // Then: 1번의 쿼리만 발생했는지 검증
+        assertThat(stats.getPrepareStatementCount()).isEqualTo(1);
+
+        // 조회된 데이터 검증
+        assertThat(varieties).hasSize(3);
+        assertThat(varieties).extracting("varietyName")
+                .containsExactlyInAnyOrder("방울토마토", "대추토마토", "백다다기");
+
+        // 페치 조인이 정상 작동하는지 검증 - 추가 쿼리 없이 연관 엔티티 접근 가능
+        long queryCountBeforeAccess = stats.getPrepareStatementCount();
+        for (CropVariety variety : varieties) {
+            String typeName = variety.getCropType().getTypeName();
+            String categoryName = variety.getCropType().getCategory().getCategoryName();
+            assertThat(typeName).isNotNull();
+            assertThat(categoryName).isNotNull();
+        }
+        long queryCountAfterAccess = stats.getPrepareStatementCount();
+
+        // 연관 엔티티 접근 시 추가 쿼리가 발생하지 않았는지 검증
+        assertThat(queryCountAfterAccess).isEqualTo(queryCountBeforeAccess);
+    }
+
+    @Test
+    @DisplayName("전체 조회 시 삭제된 품종은 제외")
+    void findAllByDeletedFalse_ExcludeDeletedVarieties() {
+        // Given: 품종 저장 (1개는 삭제 상태)
+        CropVariety variety1 = CropVariety.builder()
+                .varietyName("방울토마토")
+                .cropType(cropType1)
+                .build();
+        CropVariety variety2 = CropVariety.builder()
+                .varietyName("대추토마토")
+                .cropType(cropType1)
+                .build();
+        CropVariety variety3 = CropVariety.builder()
+                .varietyName("백다다기")
+                .cropType(cropType2)
+                .build();
+
+        cropVarietyRepository.save(variety1);
+        cropVarietyRepository.save(variety2);
+        cropVarietyRepository.save(variety3);
+        entityManager.flush();
+
+        // variety2 삭제
+        variety2.delete();
+        entityManager.flush();
+        entityManager.clear();
+
+        // When: 전체 조회
+        List<CropVariety> varieties = cropVarietyRepository.findAllByDeletedFalse();
+
+        // Then: 삭제되지 않은 품종만 조회
+        assertThat(varieties).hasSize(2);
+        assertThat(varieties).extracting("varietyName")
+                .containsExactlyInAnyOrder("방울토마토", "백다다기")
+                .doesNotContain("대추토마토");
+    }
+
+    @Test
+    @DisplayName("전체 조회 시 데이터가 없으면 빈 리스트 반환")
+    void findAllByDeletedFalse_EmptyList_WhenNoData() {
+        // Given: 저장된 품종이 없음
+
+        // When: 전체 조회
+        List<CropVariety> varieties = cropVarietyRepository.findAllByDeletedFalse();
+
+        // Then: 빈 리스트 반환
+        assertThat(varieties).isEmpty();
     }
 
 }

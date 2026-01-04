@@ -7,6 +7,7 @@ import com.cropkeeper.crop.entity.CropType;
 import com.cropkeeper.crop.entity.CropVariety;
 import com.cropkeeper.crop.exception.CropTypeNotFoundException;
 import com.cropkeeper.crop.exception.DuplicateCropVarietyNameException;
+import com.cropkeeper.crop.repository.CropCategoryRepository;
 import com.cropkeeper.crop.repository.CropTypeRepository;
 import com.cropkeeper.crop.repository.CropVarietyRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -29,6 +31,9 @@ class CropVarietyServiceTest {
 
     @Mock
     CropTypeRepository cropTypeRepository;
+
+    @Mock
+    CropCategoryRepository cropCategoryRepository;
 
     @InjectMocks
     CropVarietyService cropVarietyService;
@@ -147,6 +152,74 @@ class CropVarietyServiceTest {
         verify(cropTypeRepository, times(1)).findById(typeId);
         verify(cropVarietyRepository, times(1)).existsByVarietyNameAndDeletedFalse(duplicateVarietyName);
         verify(cropVarietyRepository, never()).save(any(CropVariety.class));
+    }
+
+    @Test
+    @DisplayName("상품 전체 조회 성공")
+    void getAllVarieties_Success() {
+
+        // given
+        CropCategory category = CropCategory.builder()
+                .categoryId(1L)
+                .categoryName("카테고리1")
+                .build();
+
+        CropType cropType = CropType.builder()
+                .typeId(1L)
+                .typeName("작물1")
+                .category(category)
+                .build();
+
+        CropVariety variety1 = CropVariety.builder()
+                .varietyId(1L)
+                .varietyName("품종1")
+                .cropType(cropType)
+                .build();
+
+        CropVariety variety2 = CropVariety.builder()
+                .varietyId(2L)
+                .varietyName("품종2")
+                .cropType(cropType)
+                .build();
+
+        CropVariety variety3 = CropVariety.builder()
+                .varietyId(3L)
+                .varietyName("품종3")
+                .cropType(cropType)
+                .build();
+
+        List<CropVariety> varieties = List.of(variety1, variety2, variety3);
+
+        when(cropVarietyRepository.findAllByDeletedFalse()).thenReturn(varieties);
+
+        // when
+        List<CropVarietyResponse> responses = cropVarietyService.getAllCropVarieties();
+
+        // then
+        assertThat(responses)
+                .isNotNull()
+                .hasSize(3);
+        assertThat(responses.get(0).getVarietyName()).isEqualTo("품종1");
+        assertThat(responses.get(1).getVarietyName()).isEqualTo("품종2");
+        assertThat(responses.get(2).getVarietyName()).isEqualTo("품종3");
+
+        verify(cropVarietyRepository, times(1)).findAllByDeletedFalse();
+    }
+
+    @Test
+    @DisplayName("품종 전체 조회 - 등록된 품종 없음")
+    void getAllVarieties_VarietyNotFound_EmptyList() {
+
+        // given
+        when(cropVarietyRepository.findAllByDeletedFalse()).thenReturn(List.of());
+
+        // when
+        List<CropVarietyResponse> responses = cropVarietyService.getAllCropVarieties();
+
+        // then
+        assertThat(responses)
+                .isNotNull()
+                .isEmpty();
     }
 
 

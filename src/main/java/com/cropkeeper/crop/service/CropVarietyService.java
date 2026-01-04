@@ -14,18 +14,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CropVarietyService {
 
-    @Autowired
     private final CropTypeRepository cropTypeRepository;
-
-    @Autowired
     private final CropVarietyRepository cropVarietyRepository;
 
+    /**
+     * 품종 생성
+     *
+     * @param request 품종 생성 요청 정보
+     * @return 생성된 품종 응답 정보
+     * @throws CropTypeNotFoundException 작물이 존재하지 않을 경우
+     * @throws DuplicateCropVarietyNameException 품종명이 중복된 경우
+     */
     @Transactional
     public CropVarietyResponse createCropVariety(CreateCropVarietyRequest request) {
 
@@ -48,6 +55,25 @@ public class CropVarietyService {
         return CropVarietyResponse.from(savedCropVariety);
     }
 
+    /**
+     * 품종 전체 조회
+     *
+     * @return 조회한 품종 응답 목록
+     */
+    public List<CropVarietyResponse> getAllCropVarieties() {
+        List<CropVariety> cropVarieties = cropVarietyRepository.findAllByDeletedFalse();
+
+        return cropVarieties.stream()
+                .map(CropVarietyResponse::from)
+                .toList();
+    }
+
+
+    /**
+     * 품종명 존재 여부 검증
+     * @param varietyName 품종 이름
+     * @throws DuplicateCropVarietyNameException 품종명이 이미 존재하는 경우
+     */
     private void validationVarietyNameNotDuplicate(String varietyName) {
 
         if (cropVarietyRepository.existsByVarietyNameAndDeletedFalse(varietyName)) {
@@ -57,6 +83,12 @@ public class CropVarietyService {
         }
     }
 
+    /**
+     * 작물 ID 조회
+     * @param typeId 조회할 작물 ID
+     * @return 조회한 작물 ID
+     * @throws CropTypeNotFoundException 조회할 작물이 존재하지 않는 경우
+     */
     private CropType findCropTypeById(Long typeId) {
 
         return cropTypeRepository.findById(typeId)

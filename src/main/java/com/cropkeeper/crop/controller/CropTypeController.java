@@ -24,14 +24,12 @@ public class CropTypeController {
 
     /**
      * 작물 생성 API
-     * @param userPrincipal
      * @param request
      * @return
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<CropTypeResponse> createCropType(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody CreateCropTypeRequest request) {
 
         CropTypeResponse response = cropTypeService.createCropType(request);
@@ -70,7 +68,6 @@ public class CropTypeController {
     /**
      * 작물 수정 API
      *
-     * @param userPrincipal 인증된 사용자 (관리자)
      * @param typeId 작물 ID
      * @param request 수정 요청
      * @return 수정된 작물 응답
@@ -78,7 +75,6 @@ public class CropTypeController {
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{typeId}")
     public ResponseEntity<CropTypeResponse> updateCropType(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable Long typeId,
             @Valid @RequestBody UpdateCropTypeRequest request) {
 
@@ -89,15 +85,12 @@ public class CropTypeController {
     /**
      * 작물 삭제 API
      *
-     * @param userPrincipal 인증된 사용자 (관리자)
      * @param typeId 삭제할 작물 ID
      * @return 204 No Content
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{typeId}")
-    public ResponseEntity<Void> deleteCropType(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long typeId) {
+    public ResponseEntity<Void> deleteCropType(@PathVariable Long typeId) {
 
         cropTypeService.deleteCropType(typeId);
         return ResponseEntity.noContent().build();

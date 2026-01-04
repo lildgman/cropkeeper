@@ -22,9 +22,15 @@ public class CropVarietyController {
 
     private final CropVarietyService cropVarietyService;
 
+    /**
+     * 품종 생성 API
+     *
+//     * @param userPrincipal 현재 로그인한 회원 정보
+     * @param request
+     * @return
+     */
     @PostMapping
     public ResponseEntity<CropVarietyResponse> createCropVariety(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody CreateCropVarietyRequest request) {
 
         CropVarietyResponse response = cropVarietyService.createCropVariety(request);

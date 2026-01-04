@@ -61,7 +61,7 @@ public class CropCategoryService {
 
         return categories.stream()
                 .map(CropCategoryResponse::from)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
