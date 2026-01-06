@@ -1,6 +1,6 @@
-package com.cropkeeper.global.logging;
+package com.cropkeeper.common.logging;
 
-import com.cropkeeper.global.security.UserPrincipal;
+import com.cropkeeper.common.security.UserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 

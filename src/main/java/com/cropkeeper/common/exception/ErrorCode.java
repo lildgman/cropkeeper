@@ -1,4 +1,4 @@
-package com.cropkeeper.global.exception;
+package com.cropkeeper.common.exception;
 
 import org.springframework.http.HttpStatus;
 

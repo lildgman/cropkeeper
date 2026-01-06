@@ -17,7 +17,7 @@ public interface CropVarietyRepository extends JpaRepository<CropVariety, Long> 
             "WHERE cv.cropType.typeId = :typeId " +
             "AND cv.varietyName = :varietyName " +
             "AND cv.deleted = false")
-    Optional<CropVariety> findByCropCropIdAndVarietyName(@Param("typeId") Long typeId, @Param("varietyName") String varietyName);
+    Optional<CropVariety> findByCropType_TypeIdAndVarietyName(@Param("typeId") Long typeId, @Param("varietyName") String varietyName);
 
     @Query("SELECT cv " +
             "FROM CropVariety cv " +
@@ -51,4 +51,12 @@ public interface CropVarietyRepository extends JpaRepository<CropVariety, Long> 
             "JOIN FETCH ct.category " +
             "WHERE cv.deleted = false")
     List<CropVariety> findAllByDeletedFalse();
+
+    @Query("SELECT cv " +
+            "FROM CropVariety cv " +
+            "JOIN FETCH cv.cropType ct " +
+            "JOIN FETCH ct.category " +
+            "WHERE ct.cropType.typeId = :typeId " +
+            "AND cv.deleted = false")
+    List<CropVariety> findByCropType_TypeIdAndDeletedFalse(Long typeId);
 }

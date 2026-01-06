@@ -4,13 +4,11 @@ import com.cropkeeper.crop.dto.request.CreateCropCategoryRequest;
 import com.cropkeeper.crop.dto.request.UpdateCropCategoryRequest;
 import com.cropkeeper.crop.service.CropCategoryService;
 import com.cropkeeper.crop.dto.response.CropCategoryResponse;
-import com.cropkeeper.global.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

@@ -37,4 +37,6 @@ public interface CropCategoryRepository extends JpaRepository<CropCategory, Long
             "FROM CropCategory cc " +
             "WHERE cc.deleted = false")
     List<CropCategory> findAllByDeletedFalse();
+
+    boolean existsByCategoryIdAndDeletedFalse(@Param("categoryId") Long categoryId);
 }

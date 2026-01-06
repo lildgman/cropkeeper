@@ -55,6 +55,8 @@ public interface CropTypeRepository extends JpaRepository<CropType, Long> {
             "AND ct.deleted = false")
     List<CropType> findByCategoryCategoryIdAndDeletedFalse(Long categoryId);
 
+    boolean existsByTypeIdAndDeletedFalse(@Param("typeId") Long typeId);
+
 }
 
 

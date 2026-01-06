@@ -1,4 +1,4 @@
-package com.cropkeeper.global.logging;
+package com.cropkeeper.common.logging;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

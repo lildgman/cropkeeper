@@ -1,4 +1,4 @@
-package com.cropkeeper.global.security;
+package com.cropkeeper.common.security;
 
 import com.cropkeeper.auth.exception.DeletedMemberLoginException;
 import com.cropkeeper.member.entity.Member;

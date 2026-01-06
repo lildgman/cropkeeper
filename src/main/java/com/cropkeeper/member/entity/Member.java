@@ -1,7 +1,7 @@
 package com.cropkeeper.member.entity;
 
 import com.cropkeeper.farm.entity.Farm;
-import com.cropkeeper.global.common.BaseTimeEntity;
+import com.cropkeeper.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

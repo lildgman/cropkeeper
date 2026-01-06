@@ -1,6 +1,6 @@
-package com.cropkeeper.global.config;
+package com.cropkeeper.common.config;
 
-import com.cropkeeper.global.security.JwtAuthenticationFilter;
+import com.cropkeeper.common.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

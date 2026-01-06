@@ -4,13 +4,11 @@ import com.cropkeeper.crop.dto.request.CreateCropTypeRequest;
 import com.cropkeeper.crop.dto.request.UpdateCropTypeRequest;
 import com.cropkeeper.crop.dto.response.CropTypeResponse;
 import com.cropkeeper.crop.service.CropTypeService;
-import com.cropkeeper.global.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +23,7 @@ public class CropTypeController {
     /**
      * 작물 생성 API
      * @param request
-     * @return
+     * @return 201 created, 생성된 작물 정보
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping

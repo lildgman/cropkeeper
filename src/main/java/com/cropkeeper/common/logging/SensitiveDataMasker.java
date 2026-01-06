@@ -1,10 +1,9 @@
-package com.cropkeeper.global.logging;
+package com.cropkeeper.common.logging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * 로그 출력 시 민감정보를 자동으로 마스킹하는 유틸리티 클래스

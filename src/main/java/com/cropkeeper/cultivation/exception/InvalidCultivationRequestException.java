@@ -1,7 +1,7 @@
 package com.cropkeeper.cultivation.exception;
 
-import com.cropkeeper.global.exception.BaseException;
-import com.cropkeeper.global.exception.ErrorCode;
+import com.cropkeeper.common.exception.BaseException;
+import com.cropkeeper.common.exception.ErrorCode;
 
 public class InvalidCultivationRequestException extends BaseException {
 

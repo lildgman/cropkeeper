@@ -3,7 +3,7 @@ package com.cropkeeper.pest.entity;
 import com.cropkeeper.farm.entity.Farm;
 import com.cropkeeper.farminglog.vo.FarmingMetadata;
 import com.cropkeeper.member.entity.Member;
-import com.cropkeeper.global.common.BaseTimeEntity;
+import com.cropkeeper.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

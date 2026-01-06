@@ -1,6 +1,6 @@
 package com.cropkeeper.member.exception;
 
-import com.cropkeeper.global.exception.BaseException;
+import com.cropkeeper.common.exception.BaseException;
 
 public class PasswordMismatchException extends BaseException {
 

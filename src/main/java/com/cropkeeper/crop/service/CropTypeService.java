@@ -96,12 +96,18 @@ public class CropTypeService {
      * @return 해당 카테고리에 속한 작물 목록 응답
      */
     public List<CropTypeResponse> getCropTypesByCategoryId(Long categoryId) {
-
+        validateCropCategoryExists(categoryId);
         List<CropType> cropTypes = cropTypeRepository.findByCategoryCategoryIdAndDeletedFalse(categoryId);
 
         return cropTypes.stream()
                 .map(CropTypeResponse::from)
                 .toList();
+    }
+
+    private void validateCropCategoryExists(Long categoryId) {
+        if (!cropCategoryRepository.existsByCategoryIdAndDeletedFalse(categoryId)) {
+            throw new CropCategoryNotFoundException(categoryId);
+        }
     }
 
     /**

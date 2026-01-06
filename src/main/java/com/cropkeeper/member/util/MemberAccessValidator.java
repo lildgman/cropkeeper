@@ -2,7 +2,7 @@ package com.cropkeeper.member.util;
 
 import com.cropkeeper.member.exception.ForbiddenMemberAccessException;
 import com.cropkeeper.member.exception.MemberErrorCode;
-import com.cropkeeper.global.security.UserPrincipal;
+import com.cropkeeper.common.security.UserPrincipal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
 package com.cropkeeper.auth.exception;
 
-import com.cropkeeper.global.exception.BaseException;
+import com.cropkeeper.common.exception.BaseException;
 
 public class DeletedMemberLoginException extends BaseException {
 

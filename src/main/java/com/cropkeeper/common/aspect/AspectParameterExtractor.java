@@ -1,6 +1,6 @@
-package com.cropkeeper.global.aspect;
+package com.cropkeeper.common.aspect;
 
-import com.cropkeeper.global.security.UserPrincipal;
+import com.cropkeeper.common.security.UserPrincipal;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;

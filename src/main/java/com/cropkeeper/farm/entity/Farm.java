@@ -2,7 +2,7 @@ package com.cropkeeper.farm.entity;
 
 import com.cropkeeper.farm.vo.Address;
 import com.cropkeeper.member.entity.Member;
-import com.cropkeeper.global.common.BaseTimeEntity;
+import com.cropkeeper.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

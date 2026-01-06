@@ -5,7 +5,7 @@ import com.cropkeeper.member.dto.response.MemberResponse;
 import com.cropkeeper.member.dto.request.UpdateMemberInfoRequest;
 import com.cropkeeper.member.dto.request.UpdatePasswordRequest;
 import com.cropkeeper.member.service.MemberService;
-import com.cropkeeper.global.security.UserPrincipal;
+import com.cropkeeper.common.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +23,11 @@ public class MemberController {
      * 회원 정보 조회 API
      *
      * @param memberId      회원 ID
-     * @param userPrincipal 현재 로그인한 사용자 정보
+     * @param userPrincipal 인증된 사용자 정보
      * @return 200 OK + 회원정보
      */
-    @ValidateMemberAccess(action = "회원 정보 조회")
     @GetMapping("/{memberId}")
+    @ValidateMemberAccess(action = "회원 정보 조회")
     public ResponseEntity<MemberResponse> getMemberInfo(
             @PathVariable Long memberId,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -40,16 +40,16 @@ public class MemberController {
      * 회원 정보 수정 API
      *
      * @param memberId      회원 ID
-     * @param userPrincipal 현재 로그인한 사용자 정보
      * @param request       회원 정보 수정 요청 request
+     * @param userPrincipal 인증된 사용자 정보
      * @return 200 OK + 수정된 회원 정보
      */
-    @ValidateMemberAccess(action = "회원 정보 수정")
     @PutMapping("/{memberId}")
+    @ValidateMemberAccess(action = "회원 정보 수정")
     public ResponseEntity<MemberResponse> updateMemberInfo(
             @PathVariable Long memberId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @Valid @RequestBody UpdateMemberInfoRequest request) {
+            @Valid @RequestBody UpdateMemberInfoRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         MemberResponse response = memberService.updateMemberInfo(memberId, request);
         return ResponseEntity.ok(response);
@@ -58,17 +58,17 @@ public class MemberController {
     /**
      * 비밀번호 변경 API
      *
-     * @param memberId      회원ID
-     * @param userPrincipal 현재 로그인한 사용자 정보
+     * @param memberId      회원 ID
      * @param request       비밀번호 변경 요청
+     * @param userPrincipal 인증된 사용자 정보
      * @return No Content
      */
-    @ValidateMemberAccess(action = "비밀번호 변경")
     @PatchMapping("/{memberId}/password")
+    @ValidateMemberAccess(action = "비밀번호 변경")
     public ResponseEntity<Void> changePassword(
             @PathVariable Long memberId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @Valid @RequestBody UpdatePasswordRequest request) {
+            @Valid @RequestBody UpdatePasswordRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         memberService.changePassword(memberId, request);
         return ResponseEntity.noContent().build();
@@ -77,11 +77,11 @@ public class MemberController {
     /**
      * 회원 탈퇴 API
      * @param memberId 회원 ID
-     * @param userPrincipal 현재 로그인한 사용자 정보
+     * @param userPrincipal 인증된 사용자 정보
      * @return 204 No Content
      */
-    @ValidateMemberAccess(action = "회원 탈퇴")
     @DeleteMapping("/{memberId}")
+    @ValidateMemberAccess(action = "회원 탈퇴")
     public ResponseEntity<Void> deleteMember(
             @PathVariable Long memberId,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {

@@ -10,7 +10,6 @@ import com.cropkeeper.crop.repository.CropTypeRepository;
 import com.cropkeeper.crop.repository.CropVarietyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,6 +67,21 @@ public class CropVarietyService {
                 .toList();
     }
 
+    /**
+     * typeId 품종에 속해있는 작물 목록 조회
+     * @param typeId 품종 ID
+     * @return typeId에 속해있는 작물 응답 목록
+     */
+    public List<CropVarietyResponse> getCropVarietiesByTypeId(Long typeId) {
+
+        validateCropTypeExists(typeId);
+        List<CropVariety> varieties = cropVarietyRepository.findByCropType_TypeIdAndDeletedFalse(typeId);
+
+        return varieties.stream()
+                .map(CropVarietyResponse::from)
+                .toList();
+    }
+
 
     /**
      * 품종명 존재 여부 검증
@@ -93,5 +107,15 @@ public class CropVarietyService {
 
         return cropTypeRepository.findById(typeId)
                 .orElseThrow(() -> new CropTypeNotFoundException(typeId));
+    }
+
+    /**
+     * typeId 존재 여부 검증
+     * @param typeId 품종 ID
+     */
+    private void validateCropTypeExists(Long typeId) {
+        if (!cropTypeRepository.existsByTypeIdAndDeletedFalse(typeId)) {
+            throw new CropTypeNotFoundException(typeId);
+        }
     }
 }

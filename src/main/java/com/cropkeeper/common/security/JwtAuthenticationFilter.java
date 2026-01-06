@@ -1,4 +1,4 @@
-package com.cropkeeper.global.security;
+package com.cropkeeper.common.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

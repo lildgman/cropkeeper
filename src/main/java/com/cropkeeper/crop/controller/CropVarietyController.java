@@ -3,16 +3,13 @@ package com.cropkeeper.crop.controller;
 import com.cropkeeper.crop.dto.request.CreateCropVarietyRequest;
 import com.cropkeeper.crop.dto.response.CropVarietyResponse;
 import com.cropkeeper.crop.service.CropVarietyService;
-import com.cropkeeper.global.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -25,9 +22,8 @@ public class CropVarietyController {
     /**
      * 품종 생성 API
      *
-//     * @param userPrincipal 현재 로그인한 회원 정보
-     * @param request
-     * @return
+     * @param request 품종 생성 요청
+     * @return 201 created, 생성된 품종 정보
      */
     @PostMapping
     public ResponseEntity<CropVarietyResponse> createCropVariety(
@@ -38,5 +34,20 @@ public class CropVarietyController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
 
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CropVarietyResponse>> getAllVarieties(
+            @RequestParam(required = false) Long typeId) {
+
+        List<CropVarietyResponse> responses;
+
+        if (typeId != null) {
+            responses = cropVarietyService.getCropVarietiesByTypeId(typeId);
+        } else {
+            responses = cropVarietyService.getAllCropVarieties();
+        }
+
+        return ResponseEntity.ok(responses);
     }
 }

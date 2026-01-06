@@ -1,7 +1,7 @@
 package com.cropkeeper.farm.exception;
 
 
-import com.cropkeeper.global.exception.BaseException;
+import com.cropkeeper.common.exception.BaseException;
 
 public class FarmNotFoundException extends BaseException {
 

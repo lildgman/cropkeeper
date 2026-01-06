@@ -5,7 +5,7 @@ import com.cropkeeper.farm.dto.request.CreateFarmRequest;
 import com.cropkeeper.farm.dto.request.UpdateFarmRequest;
 import com.cropkeeper.farm.dto.response.FarmResponse;
 import com.cropkeeper.farm.service.FarmService;
-import com.cropkeeper.global.security.UserPrincipal;
+import com.cropkeeper.common.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

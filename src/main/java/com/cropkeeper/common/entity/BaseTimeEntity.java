@@ -1,4 +1,4 @@
-package com.cropkeeper.global.common;
+package com.cropkeeper.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

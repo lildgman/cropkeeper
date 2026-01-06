@@ -2,10 +2,10 @@ package com.cropkeeper.member.aspect;
 
 import com.cropkeeper.member.annotation.ValidateMemberAccess;
 import com.cropkeeper.member.exception.ForbiddenMemberAccessException;
-import com.cropkeeper.member.exception.InvalidAspectConfigurationException;
 import com.cropkeeper.member.exception.MemberErrorCode;
-import com.cropkeeper.global.aspect.AspectParameterExtractor;
-import com.cropkeeper.global.security.UserPrincipal;
+import com.cropkeeper.common.aspect.AspectParameterExtractor;
+import com.cropkeeper.common.security.UserPrincipal;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 @Slf4j
 @Aspect
 @Component
+@RequiredArgsConstructor
 public class MemberAccessAspect {
 
     /**
@@ -48,26 +49,26 @@ public class MemberAccessAspect {
         UserPrincipal userPrincipal = AspectParameterExtractor.extractUserPrincipal(joinPoint);
 
         // 필수 파라미터 검증
-        if (requestedMemberId == null || userPrincipal == null) {
-            log.error("@ValidateMemberAccess를 사용하려면 메서드에 @PathVariable Long memberId와 " +
-                    "@AuthenticationPrincipal UserPrincipal 파라미터가 필요합니다. " +
-                    "메서드: {}", method.getName());
-            throw new InvalidAspectConfigurationException(
-                    MemberErrorCode.INVALID_ASPECT_CONFIGURATION,
-                    "메서드: " + method.getName()
-            );
-        }
+        AspectParameterExtractor.validateRequiredParameters(
+                "@ValidateMemberAccess",
+                method,
+                AspectParameterExtractor.ParameterPair.of("@PathVariable Long memberId", requestedMemberId),
+                AspectParameterExtractor.ParameterPair.of("@AuthenticationPrincipal UserPrincipal", userPrincipal)
+        );
 
         // 작업명 결정 (공통 유틸리티 사용)
         String action = AspectParameterExtractor.getActionName(joinPoint, validateMemberAccess.action());
 
-        // 권한 검증
-        if (!requestedMemberId.equals(userPrincipal.getId())) {
-            log.warn("권한 없는 {} 시도: 요청 memberId = {}, 실제 memberId = {}",
-                    action, requestedMemberId, userPrincipal.getId());
+        // 권한 검증: 요청된 회원 ID와 현재 사용자 ID가 동일한지 확인
+        Long currentUserId = userPrincipal.getId();
+
+        if (!requestedMemberId.equals(currentUserId)) {
+            log.warn("권한 없는 {} 시도: 요청 memberId = {}, 현재 사용자 = {}",
+                    action, requestedMemberId, currentUserId);
             throw new ForbiddenMemberAccessException(MemberErrorCode.FORBIDDEN_ACCESS);
         }
 
-        log.debug("회원 접근 권한 검증 성공: {} (memberId = {})", action, requestedMemberId);
+        log.debug("회원 접근 권한 검증 성공: {} (memberId = {})",
+                action, currentUserId);
     }
 }

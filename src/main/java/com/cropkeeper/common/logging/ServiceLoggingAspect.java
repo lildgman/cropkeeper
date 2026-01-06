@@ -1,4 +1,4 @@
-package com.cropkeeper.global.logging;
+package com.cropkeeper.common.logging;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

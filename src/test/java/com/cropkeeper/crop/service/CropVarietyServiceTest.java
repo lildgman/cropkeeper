@@ -222,5 +222,255 @@ class CropVarietyServiceTest {
                 .isEmpty();
     }
 
+    @Test
+    @DisplayName("품종 전체 조회 - 1개 품종만 존재")
+    void getAllVarieties_OnlyOneVariety() {
 
+        // given
+        CropCategory category = CropCategory.builder()
+                .categoryId(1L)
+                .categoryName("카테고리1")
+                .build();
+
+        CropType cropType = CropType.builder()
+                .typeId(1L)
+                .typeName("작물1")
+                .category(category)
+                .build();
+
+        CropVariety variety = CropVariety.builder()
+                .varietyId(1L)
+                .varietyName("품종1")
+                .cropType(cropType)
+                .build();
+
+        when(cropVarietyRepository.findAllByDeletedFalse()).thenReturn(List.of(variety));
+
+        // when
+        List<CropVarietyResponse> responses = cropVarietyService.getAllCropVarieties();
+
+        // then
+        assertThat(responses)
+                .isNotNull()
+                .hasSize(1);
+        CropVarietyResponse response = responses.get(0);
+        assertThat(response.getVarietyId()).isEqualTo(1L);
+        assertThat(response.getVarietyName()).isEqualTo("품종1");
+        assertThat(response.getTypeId()).isEqualTo(1L);
+        assertThat(response.getTypeName()).isEqualTo("작물1");
+        assertThat(response.getCategoryId()).isEqualTo(1L);
+        assertThat(response.getCategoryName()).isEqualTo("카테고리1");
+
+        verify(cropVarietyRepository, times(1)).findAllByDeletedFalse();
+
+    }
+
+    @Test
+    @DisplayName("품종 전체 조회 - 삭제된 품종은 제외")
+    void getAllVarieties_ReturnsOnlyNotDeleted() {
+
+        // given
+        CropCategory category = CropCategory.builder()
+                .categoryId(1L)
+                .categoryName("카테고리1")
+                .build();
+
+        CropType cropType = CropType.builder()
+                .typeId(1L)
+                .typeName("작물1")
+                .category(category)
+                .build();
+
+        CropVariety variety1 = CropVariety.builder()
+                .varietyId(1L)
+                .varietyName("품종1")
+                .cropType(cropType)
+                .build();
+        CropVariety variety2 = CropVariety.builder()
+                .varietyId(2L)
+                .varietyName("품종2")
+                .cropType(cropType)
+                .build();
+        CropVariety variety3 = CropVariety.builder()
+                .varietyId(3L)
+                .varietyName("품종3")
+                .cropType(cropType)
+                .build();
+        CropVariety variety4 = CropVariety.builder()
+                .varietyId(4L)
+                .varietyName("품종4")
+                .cropType(cropType)
+                .build();
+
+        variety2.delete();
+        variety4.delete();
+
+        when(cropVarietyRepository.findAllByDeletedFalse()).thenReturn(List.of(variety1, variety3));
+
+        // when
+        List<CropVarietyResponse> responses = cropVarietyService.getAllCropVarieties();
+
+        // then
+        assertThat(responses)
+                .isNotNull()
+                .hasSize(2);
+        assertThat(responses)
+                .extracting("varietyId")
+                .containsExactly(1L, 3L);
+        assertThat(responses)
+                .extracting("varietyName")
+                .containsExactly("품종1", "품종3");
+        assertThat(responses)
+                .extracting("varietyId")
+                .doesNotContain(2L, 4L);
+
+        verify(cropVarietyRepository, times(1)).findAllByDeletedFalse();
+    }
+
+    @Test
+    @DisplayName("품종 전체 조회 - 여러 CropType에 속한 품종 포함 조회")
+    void getAllCropVarieties_MultipleCropTypes_Success() {
+
+        // given
+        CropCategory category = CropCategory.builder()
+                .categoryId(1L)
+                .categoryName("카테고리1")
+                .build();
+
+        CropType cropType1 = CropType.builder()
+                .typeId(1L)
+                .typeName("작물1")
+                .category(category)
+                .build();
+
+        CropType cropType2 = CropType.builder()
+                .typeId(2L)
+                .typeName("작물2")
+                .category(category)
+                .build();
+
+        CropVariety variety1 = CropVariety.builder()
+                .varietyId(1L)
+                .varietyName("품종1")
+                .cropType(cropType1)
+                .build();
+        CropVariety variety2 = CropVariety.builder()
+                .varietyId(2L)
+                .varietyName("품종2")
+                .cropType(cropType2)
+                .build();
+        CropVariety variety3 = CropVariety.builder()
+                .varietyId(3L)
+                .varietyName("품종3")
+                .cropType(cropType1)
+                .build();
+        CropVariety variety4 = CropVariety.builder()
+                .varietyId(4L)
+                .varietyName("품종4")
+                .cropType(cropType2)
+                .build();
+
+        when(cropVarietyRepository.findAllByDeletedFalse())
+                .thenReturn(List.of(variety1, variety2, variety3, variety4));
+
+        // when
+        List<CropVarietyResponse> responses = cropVarietyService.getAllCropVarieties();
+
+        // then
+        assertThat(responses)
+                .isNotNull()
+                .hasSize(4);
+
+        assertThat(responses.get(0).getVarietyId()).isEqualTo(1L);
+        assertThat(responses.get(0).getVarietyName()).isEqualTo("품종1");
+        assertThat(responses.get(0).getTypeId()).isEqualTo(1L);
+        assertThat(responses.get(0).getTypeName()).isEqualTo("작물1");
+
+        assertThat(responses.get(1).getVarietyId()).isEqualTo(2L);
+        assertThat(responses.get(1).getVarietyName()).isEqualTo("품종2");
+        assertThat(responses.get(1).getTypeId()).isEqualTo(2L);
+        assertThat(responses.get(1).getTypeName()).isEqualTo("작물2");
+
+        assertThat(responses.get(2).getVarietyId()).isEqualTo(3L);
+        assertThat(responses.get(2).getVarietyName()).isEqualTo("품종3");
+        assertThat(responses.get(2).getTypeId()).isEqualTo(1L);
+        assertThat(responses.get(2).getTypeName()).isEqualTo("작물1");
+
+        assertThat(responses.get(3).getVarietyId()).isEqualTo(4L);
+        assertThat(responses.get(3).getVarietyName()).isEqualTo("품종4");
+        assertThat(responses.get(3).getTypeId()).isEqualTo(2L);
+        assertThat(responses.get(3).getTypeName()).isEqualTo("작물2");
+
+        verify(cropVarietyRepository, times(1)).findAllByDeletedFalse();
+
+    }
+
+    @Test
+    @DisplayName("CropType에 속해있는 품종 조회 - 성공")
+    void getCropVarietiesByTypeIdId_Success() {
+
+        // given
+        Long typeId = 1L;
+        CropCategory category = CropCategory.builder()
+                .categoryId(1L)
+                .categoryName("카테고리1")
+                .build();
+
+        CropType cropType1 = CropType.builder()
+                .typeId(typeId)
+                .typeName("작물1")
+                .category(category)
+                .build();
+
+        CropType cropType2 = CropType.builder()
+                .typeId(2L)
+                .typeName("작물2")
+                .category(category)
+                .build();
+
+        CropVariety variety1 = CropVariety.builder()
+                .varietyId(1L)
+                .varietyName("품종1")
+                .cropType(cropType1)
+                .build();
+        CropVariety variety2 = CropVariety.builder()
+                .varietyId(2L)
+                .varietyName("품종2")
+                .cropType(cropType2)
+                .build();
+        CropVariety variety3 = CropVariety.builder()
+                .varietyId(3L)
+                .varietyName("품종3")
+                .cropType(cropType1)
+                .build();
+        CropVariety variety4 = CropVariety.builder()
+                .varietyId(4L)
+                .varietyName("품종4")
+                .cropType(cropType2)
+                .build();
+
+        when(cropTypeRepository.existsByTypeIdAndDeletedFalse(typeId)).thenReturn(true);
+        when(cropVarietyRepository.findByCropType_TypeIdAndDeletedFalse(typeId)).thenReturn(List.of(variety1, variety3));
+
+        // when
+        List<CropVarietyResponse> responses = cropVarietyService.getCropVarietiesByTypeId(typeId);
+
+        // then
+        assertThat(responses)
+                .isNotNull()
+                .hasSize(2);
+        assertThat(responses.get(0).getVarietyId()).isEqualTo(1L);
+        assertThat(responses.get(0).getVarietyName()).isEqualTo("품종1");
+        assertThat(responses.get(0).getTypeId()).isEqualTo(typeId);
+        assertThat(responses.get(0).getTypeName()).isEqualTo("작물1");
+
+        assertThat(responses.get(1).getVarietyId()).isEqualTo(3L);
+        assertThat(responses.get(1).getVarietyName()).isEqualTo("품종3");
+        assertThat(responses.get(1).getTypeId()).isEqualTo(typeId);
+        assertThat(responses.get(1).getTypeName()).isEqualTo("작물1");
+
+        verify(cropTypeRepository, times(1)).existsByTypeIdAndDeletedFalse(typeId);
+        verify(cropVarietyRepository, times(1)).findByCropType_TypeIdAndDeletedFalse(typeId);
+
+    }
 }
