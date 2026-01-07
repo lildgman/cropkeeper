@@ -56,7 +56,7 @@ public interface CropVarietyRepository extends JpaRepository<CropVariety, Long> 
             "FROM CropVariety cv " +
             "JOIN FETCH cv.cropType ct " +
             "JOIN FETCH ct.category " +
-            "WHERE ct.cropType.typeId = :typeId " +
+            "WHERE ct.typeId = :typeId " +
             "AND cv.deleted = false")
     List<CropVariety> findByCropType_TypeIdAndDeletedFalse(Long typeId);
 }

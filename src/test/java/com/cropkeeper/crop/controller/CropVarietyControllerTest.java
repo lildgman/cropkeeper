@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -266,5 +267,331 @@ class CropVarietyControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isForbidden());
+    }
+
+    // ============== getAllVarieties() 메서드 테스트 ==============
+
+    @Test
+    @DisplayName("전체 품종 조회 성공 - typeId 파라미터 없음")
+    void getAllVarieties_Success_WithoutTypeId() throws Exception {
+
+        // given
+        CropType cropType = cropTypeRepository.findById(testTypeId).get();
+
+        CropVariety variety1 = CropVariety.builder()
+                .varietyName("품종1")
+                .cropType(cropType)
+                .build();
+        cropVarietyRepository.save(variety1);
+
+        CropVariety variety2 = CropVariety.builder()
+                .varietyName("품종2")
+                .cropType(cropType)
+                .build();
+        cropVarietyRepository.save(variety2);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-varieties")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].varietyName").value("품종1"))
+                .andExpect(jsonPath("$[1].varietyName").value("품종2"));
+    }
+
+    @Test
+    @DisplayName("전체 품종 조회 성공 - 여러 개의 품종 존재")
+    void getAllVarieties_Success_MultipleVarieties() throws Exception {
+
+        // given
+        // 카테고리 2개 생성
+        CropCategory category1 = CropCategory.builder()
+                .categoryName("카테고리1")
+                .build();
+        cropCategoryRepository.save(category1);
+
+        CropCategory category2 = CropCategory.builder()
+                .categoryName("카테고리2")
+                .build();
+        cropCategoryRepository.save(category2);
+
+        // 작물 2개 생성
+        CropType type1 = CropType.builder()
+                .typeName("작물1")
+                .category(category1)
+                .build();
+        cropTypeRepository.save(type1);
+
+        CropType type2 = CropType.builder()
+                .typeName("작물2")
+                .category(category2)
+                .build();
+        cropTypeRepository.save(type2);
+
+        // 각 작물에 품종 생성
+        CropVariety variety1 = CropVariety.builder()
+                .varietyName("작물1-품종1")
+                .cropType(type1)
+                .build();
+        cropVarietyRepository.save(variety1);
+
+        CropVariety variety2 = CropVariety.builder()
+                .varietyName("작물1-품종2")
+                .cropType(type1)
+                .build();
+        cropVarietyRepository.save(variety2);
+
+        CropVariety variety3 = CropVariety.builder()
+                .varietyName("작물2-품종1")
+                .cropType(type2)
+                .build();
+        cropVarietyRepository.save(variety3);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-varieties")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(3));
+    }
+
+    @Test
+    @DisplayName("특정 작물의 품종 조회 성공 - typeId 파라미터 있음")
+    void getAllVarieties_Success_WithTypeId() throws Exception {
+
+        // given
+        CropType cropType = cropTypeRepository.findById(testTypeId).get();
+
+        CropVariety variety1 = CropVariety.builder()
+                .varietyName("토마토품종1")
+                .cropType(cropType)
+                .build();
+        cropVarietyRepository.save(variety1);
+
+        CropVariety variety2 = CropVariety.builder()
+                .varietyName("토마토품종2")
+                .cropType(cropType)
+                .build();
+        cropVarietyRepository.save(variety2);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-varieties")
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("typeId", testTypeId.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].varietyName").value("토마토품종1"))
+                .andExpect(jsonPath("$[1].varietyName").value("토마토품종2"))
+                .andExpect(jsonPath("$[0].typeId").value(testTypeId))
+                .andExpect(jsonPath("$[1].typeId").value(testTypeId));
+    }
+
+    @Test
+    @DisplayName("전체 품종 조회 - 빈 목록 (품종이 하나도 없음)")
+    void getAllVarieties_EmptyList_NoVarieties() throws Exception {
+
+        // given
+        // 품종을 생성하지 않음
+
+        // when, then
+        mockMvc.perform(get("/api/crop-varieties")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    @DisplayName("특정 작물의 품종 조회 - 빈 목록 (해당 작물에 품종 없음)")
+    void getAllVarieties_EmptyList_NoVarietiesForType() throws Exception {
+
+        // given
+        // testTypeId에 품종을 생성하지 않음
+
+        // when, then
+        mockMvc.perform(get("/api/crop-varieties")
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("typeId", testTypeId.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    @DisplayName("전체 품종 조회 - 삭제된 품종 제외")
+    void getAllVarieties_ExcludeDeleted_AllVarieties() throws Exception {
+
+        // given
+        CropType cropType = cropTypeRepository.findById(testTypeId).get();
+
+        // 활성 품종
+        CropVariety activeVariety = CropVariety.builder()
+                .varietyName("활성품종")
+                .cropType(cropType)
+                .build();
+        cropVarietyRepository.save(activeVariety);
+
+        // 삭제된 품종
+        CropVariety deletedVariety = CropVariety.builder()
+                .varietyName("삭제된품종")
+                .cropType(cropType)
+                .build();
+        cropVarietyRepository.save(deletedVariety);
+        deletedVariety.delete();
+        cropVarietyRepository.save(deletedVariety);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-varieties")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].varietyName").value("활성품종"));
+    }
+
+    @Test
+    @DisplayName("특정 작물의 품종 조회 - 삭제된 품종 제외")
+    void getAllVarieties_ExcludeDeleted_ByTypeId() throws Exception {
+
+        // given
+        CropType cropType = cropTypeRepository.findById(testTypeId).get();
+
+        // 활성 품종 2개
+        CropVariety activeVariety1 = CropVariety.builder()
+                .varietyName("활성품종1")
+                .cropType(cropType)
+                .build();
+        cropVarietyRepository.save(activeVariety1);
+
+        CropVariety activeVariety2 = CropVariety.builder()
+                .varietyName("활성품종2")
+                .cropType(cropType)
+                .build();
+        cropVarietyRepository.save(activeVariety2);
+
+        // 삭제된 품종
+        CropVariety deletedVariety = CropVariety.builder()
+                .varietyName("삭제된품종")
+                .cropType(cropType)
+                .build();
+        cropVarietyRepository.save(deletedVariety);
+        deletedVariety.delete();
+        cropVarietyRepository.save(deletedVariety);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-varieties")
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("typeId", testTypeId.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].varietyName").value("활성품종1"))
+                .andExpect(jsonPath("$[1].varietyName").value("활성품종2"));
+    }
+
+    @Test
+    @DisplayName("특정 작물의 품종 조회 실패 - 존재하지 않는 typeId")
+    void getAllVarieties_Fail_TypeIdNotFound() throws Exception {
+
+        // given
+        Long nonExistentTypeId = 9999L;
+
+        // when, then
+        mockMvc.perform(get("/api/crop-varieties")
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("typeId", nonExistentTypeId.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(containsString("존재하지 않는 작물입니다.")));
+    }
+
+    @Test
+    @DisplayName("품종 조회 실패 - 인증 토큰 없음")
+    void getAllVarieties_Fail_NoAuth() throws Exception {
+
+        // given
+        // 품종 생성
+        CropType cropType = cropTypeRepository.findById(testTypeId).get();
+        CropVariety variety = CropVariety.builder()
+                .varietyName("테스트품종")
+                .cropType(cropType)
+                .build();
+        cropVarietyRepository.save(variety);
+
+        // when, then
+        mockMvc.perform(get("/api/crop-varieties")
+                        // Authorization 헤더 없음
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("여러 작물의 품종 조회 - typeId로 필터링 확인")
+    void getAllVarieties_Success_FilterByTypeId() throws Exception {
+
+        // given
+        CropCategory category = cropCategoryRepository.findById(testCategoryId).get();
+
+        // 작물 A (기존 testTypeId 사용)
+        CropType cropTypeA = cropTypeRepository.findById(testTypeId).get();
+
+        // 작물 B 생성
+        CropType cropTypeB = CropType.builder()
+                .typeName("작물B")
+                .category(category)
+                .build();
+        cropTypeRepository.save(cropTypeB);
+
+        // 작물 A의 품종
+        CropVariety varietyA1 = CropVariety.builder()
+                .varietyName("작물A-품종1")
+                .cropType(cropTypeA)
+                .build();
+        cropVarietyRepository.save(varietyA1);
+
+        CropVariety varietyA2 = CropVariety.builder()
+                .varietyName("작물A-품종2")
+                .cropType(cropTypeA)
+                .build();
+        cropVarietyRepository.save(varietyA2);
+
+        // 작물 B의 품종
+        CropVariety varietyB1 = CropVariety.builder()
+                .varietyName("작물B-품종1")
+                .cropType(cropTypeB)
+                .build();
+        cropVarietyRepository.save(varietyB1);
+
+        // when, then - 작물 A의 품종만 조회
+        mockMvc.perform(get("/api/crop-varieties")
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("typeId", testTypeId.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].varietyName").value("작물A-품종1"))
+                .andExpect(jsonPath("$[1].varietyName").value("작물A-품종2"))
+                .andExpect(jsonPath("$[0].typeId").value(testTypeId))
+                .andExpect(jsonPath("$[1].typeId").value(testTypeId));
     }
 }

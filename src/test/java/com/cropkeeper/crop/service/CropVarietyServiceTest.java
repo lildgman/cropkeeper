@@ -407,7 +407,7 @@ class CropVarietyServiceTest {
 
     @Test
     @DisplayName("CropType에 속해있는 품종 조회 - 성공")
-    void getCropVarietiesByTypeIdId_Success() {
+    void getCropVarietiesByTypeId_유효한TypeId_여러품종반환_성공() {
 
         // given
         Long typeId = 1L;
@@ -472,5 +472,187 @@ class CropVarietyServiceTest {
         verify(cropTypeRepository, times(1)).existsByTypeIdAndDeletedFalse(typeId);
         verify(cropVarietyRepository, times(1)).findByCropType_TypeIdAndDeletedFalse(typeId);
 
+    }
+
+    @Test
+    @DisplayName("CropType에 속한 품종 조회 - 품종이 없으면 빈 리스트 반환")
+    void getCropVarietiesByTypeId_유효한TypeId_품종없음_빈리스트반환() {
+
+        // given
+        Long typeId = 1L;
+
+        when(cropTypeRepository.existsByTypeIdAndDeletedFalse(typeId)).thenReturn(true);
+        when(cropVarietyRepository.findByCropType_TypeIdAndDeletedFalse(typeId)).thenReturn(List.of());
+
+        // when
+        List<CropVarietyResponse> responses = cropVarietyService.getCropVarietiesByTypeId(typeId);
+
+        // then
+        assertThat(responses)
+                .isNotNull()
+                .isEmpty();
+
+        verify(cropTypeRepository, times(1)).existsByTypeIdAndDeletedFalse(typeId);
+        verify(cropVarietyRepository, times(1)).findByCropType_TypeIdAndDeletedFalse(typeId);
+    }
+
+    @Test
+    @DisplayName("CropType에 속한 품종 조회 - 품종이 1개만 존재")
+    void getCropVarietiesByTypeId_유효한TypeId_품종1개_성공() {
+
+        // given
+        Long typeId = 1L;
+        CropCategory category = CropCategory.builder()
+                .categoryId(1L)
+                .categoryName("과채류")
+                .build();
+
+        CropType cropType = CropType.builder()
+                .typeId(typeId)
+                .typeName("방울토마토")
+                .category(category)
+                .build();
+
+        CropVariety variety = CropVariety.builder()
+                .varietyId(1L)
+                .varietyName("대추방울토마토")
+                .cropType(cropType)
+                .build();
+
+        when(cropTypeRepository.existsByTypeIdAndDeletedFalse(typeId)).thenReturn(true);
+        when(cropVarietyRepository.findByCropType_TypeIdAndDeletedFalse(typeId)).thenReturn(List.of(variety));
+
+        // when
+        List<CropVarietyResponse> responses = cropVarietyService.getCropVarietiesByTypeId(typeId);
+
+        // then
+        assertThat(responses)
+                .isNotNull()
+                .hasSize(1);
+
+        CropVarietyResponse response = responses.get(0);
+        assertThat(response.getVarietyId()).isEqualTo(1L);
+        assertThat(response.getVarietyName()).isEqualTo("대추방울토마토");
+        assertThat(response.getTypeId()).isEqualTo(typeId);
+        assertThat(response.getTypeName()).isEqualTo("방울토마토");
+        assertThat(response.getCategoryId()).isEqualTo(1L);
+        assertThat(response.getCategoryName()).isEqualTo("과채류");
+
+        verify(cropTypeRepository, times(1)).existsByTypeIdAndDeletedFalse(typeId);
+        verify(cropVarietyRepository, times(1)).findByCropType_TypeIdAndDeletedFalse(typeId);
+    }
+
+    @Test
+    @DisplayName("CropType에 속한 품종 조회 - 삭제된 품종은 제외")
+    void getCropVarietiesByTypeId_삭제된품종제외_성공() {
+
+        // given
+        Long typeId = 1L;
+        CropCategory category = CropCategory.builder()
+                .categoryId(1L)
+                .categoryName("과채류")
+                .build();
+
+        CropType cropType = CropType.builder()
+                .typeId(typeId)
+                .typeName("토마토")
+                .category(category)
+                .build();
+
+        CropVariety variety1 = CropVariety.builder()
+                .varietyId(1L)
+                .varietyName("품종1")
+                .cropType(cropType)
+                .build();
+
+        CropVariety variety2 = CropVariety.builder()
+                .varietyId(2L)
+                .varietyName("품종2")
+                .cropType(cropType)
+                .build();
+
+        CropVariety variety3 = CropVariety.builder()
+                .varietyId(3L)
+                .varietyName("품종3")
+                .cropType(cropType)
+                .build();
+
+        CropVariety variety4 = CropVariety.builder()
+                .varietyId(4L)
+                .varietyName("품종4")
+                .cropType(cropType)
+                .build();
+
+        // variety2와 variety4는 삭제됨
+        variety2.delete();
+        variety4.delete();
+
+        when(cropTypeRepository.existsByTypeIdAndDeletedFalse(typeId)).thenReturn(true);
+        // Repository는 deleted = false인 것만 반환 (variety1, variety3만)
+        when(cropVarietyRepository.findByCropType_TypeIdAndDeletedFalse(typeId))
+                .thenReturn(List.of(variety1, variety3));
+
+        // when
+        List<CropVarietyResponse> responses = cropVarietyService.getCropVarietiesByTypeId(typeId);
+
+        // then
+        assertThat(responses)
+                .isNotNull()
+                .hasSize(2);
+
+        assertThat(responses)
+                .extracting("varietyId")
+                .containsExactly(1L, 3L);
+
+        assertThat(responses)
+                .extracting("varietyName")
+                .containsExactly("품종1", "품종3");
+
+        // 삭제된 품종은 포함되지 않음
+        assertThat(responses)
+                .extracting("varietyId")
+                .doesNotContain(2L, 4L);
+
+        verify(cropTypeRepository, times(1)).existsByTypeIdAndDeletedFalse(typeId);
+        verify(cropVarietyRepository, times(1)).findByCropType_TypeIdAndDeletedFalse(typeId);
+    }
+
+    @Test
+    @DisplayName("CropType에 속한 품종 조회 - 존재하지 않는 typeId로 조회 시 예외 발생")
+    void getCropVarietiesByTypeId_존재하지않는TypeId_CropTypeNotFoundException발생() {
+
+        // given
+        Long nonExistentTypeId = 999L;
+
+        when(cropTypeRepository.existsByTypeIdAndDeletedFalse(nonExistentTypeId)).thenReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> cropVarietyService.getCropVarietiesByTypeId(nonExistentTypeId))
+                .isInstanceOf(CropTypeNotFoundException.class)
+                .hasMessageContaining("존재하지 않는 작물입니다");
+
+        // 존재 여부 확인만 호출되고, 조회는 호출되지 않음
+        verify(cropTypeRepository, times(1)).existsByTypeIdAndDeletedFalse(nonExistentTypeId);
+        verify(cropVarietyRepository, never()).findByCropType_TypeIdAndDeletedFalse(anyLong());
+    }
+
+    @Test
+    @DisplayName("CropType에 속한 품종 조회 - 삭제된 CropType의 typeId로 조회 시 예외 발생")
+    void getCropVarietiesByTypeId_삭제된TypeId_CropTypeNotFoundException발생() {
+
+        // given
+        Long deletedTypeId = 1L;
+
+        // 삭제된 CropType은 존재하지 않는 것으로 간주됨
+        when(cropTypeRepository.existsByTypeIdAndDeletedFalse(deletedTypeId)).thenReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> cropVarietyService.getCropVarietiesByTypeId(deletedTypeId))
+                .isInstanceOf(CropTypeNotFoundException.class)
+                .hasMessageContaining("존재하지 않는 작물입니다");
+
+        // 존재 여부 확인만 호출되고, 조회는 호출되지 않음
+        verify(cropTypeRepository, times(1)).existsByTypeIdAndDeletedFalse(deletedTypeId);
+        verify(cropVarietyRepository, never()).findByCropType_TypeIdAndDeletedFalse(anyLong());
     }
 }
